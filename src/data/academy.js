@@ -18,11 +18,11 @@ export const POINTS_PER_LEVEL = 100;
 export const MAX_SKILL_LEVEL = 5;
 
 export const categories = [
-  { id: 'science', label: 'Product & Science', color: '#5b86f0' },
-  { id: 'engagement', label: 'Customer Engagement', color: '#8b7bff' },
-  { id: 'business', label: 'Business Acumen', color: '#4fc3c9' },
-  { id: 'compliance', label: 'Compliance', color: '#e6b25c' },
-  { id: 'digital', label: 'Digital & AI', color: '#f08bb4' },
+  { id: 'science', label: 'Product & Science', color: '#4f6ef7' },
+  { id: 'engagement', label: 'Customer Engagement', color: '#8b5cf6' },
+  { id: 'business', label: 'Business Acumen', color: '#0e9a9a' },
+  { id: 'compliance', label: 'Compliance', color: '#e08a00' },
+  { id: 'digital', label: 'Digital & AI', color: '#e0457b' },
 ];
 
 /**

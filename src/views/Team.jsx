@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { LuUsers, LuFlame, LuListChecks, LuRocket, LuDownload, LuCheck, LuUndo2, LuBellRing } from 'react-icons/lu';
-import GlassCard, { CardHeader } from '../components/GlassCard.jsx';
+import Card, { CardHeader } from '../components/Card.jsx';
 import { Avatar, Chip, Button, Stat, QUEST_ICONS } from '../components/ui.jsx';
 import { skills, teams, teamById, adoptionHistory, questById, skillById, categoryById } from '../data/academy.js';
 import { skillInsights, launchReadiness, adoption, skillLevel, targetFor, skillsMatrixCsv } from '../lib/game.js';
@@ -19,20 +19,20 @@ function DemandMatrix({ insights }) {
   const seen = {};
   return (
     <svg viewBox={`0 0 ${w} ${h}`} className="w-full" role="img" aria-label="Skills by business demand and share of people below target">
-      <rect x={x(2.5)} y={pad.t} width={x(3.5) - x(2.5)} height={y(0.5) - pad.t} rx="10" fill="rgb(255 143 143 / 0.08)" />
-      <text x={x(3.5) - 8} y={pad.t + 14} textAnchor="end" fontSize="10" fill="#ff8f8f" fontWeight="600">
+      <rect x={x(2.5)} y={pad.t} width={x(3.5) - x(2.5)} height={y(0.5) - pad.t} rx="10" fill="rgb(220 61 67 / 0.06)" />
+      <text x={x(3.5) - 8} y={pad.t + 14} textAnchor="end" fontSize="10" fill="#dc3d43" fontWeight="600">
         FIX FIRST
       </text>
       {[0, 0.25, 0.5, 0.75, 1].map((t) => (
         <g key={t}>
-          <line x1={pad.l} x2={w - pad.r} y1={y(t)} y2={y(t)} stroke="rgb(255 255 255 / 0.06)" />
-          <text x={pad.l - 8} y={y(t)} textAnchor="end" dominantBaseline="middle" fontSize="10" fill="rgb(245 243 240 / 0.4)">
+          <line x1={pad.l} x2={w - pad.r} y1={y(t)} y2={y(t)} stroke="rgb(28 26 51 / 0.08)" />
+          <text x={pad.l - 8} y={y(t)} textAnchor="end" dominantBaseline="middle" fontSize="10" fill="rgb(28 26 51 / 0.55)">
             {pct(t)}
           </text>
         </g>
       ))}
       {['Baseline', 'High', 'Critical'].map((label, i) => (
-        <text key={label} x={x(i + 1)} y={h - 12} textAnchor="middle" fontSize="10" fill="rgb(245 243 240 / 0.5)">
+        <text key={label} x={x(i + 1)} y={h - 12} textAnchor="middle" fontSize="10" fill="rgb(28 26 51 / 0.55)">
           {label}
         </text>
       ))}
@@ -70,18 +70,18 @@ function AdoptionChart() {
         return (
           <g key={d.week}>
             <title>{`${d.week}: ${pct(d.activeRate)} active, ${d.quests} quests`}</title>
-            <rect x={bx(i)} y={h - pad.b - bh} width={step * 0.6} height={bh} rx="5" fill="rgb(91 134 240 / 0.3)" />
-            <text x={bx(i) + step * 0.3} y={h - 8} textAnchor="middle" fontSize="10" fill="rgb(245 243 240 / 0.45)">
+            <rect x={bx(i)} y={h - pad.b - bh} width={step * 0.6} height={bh} rx="5" fill="rgb(91 63 214 / 0.18)" />
+            <text x={bx(i) + step * 0.3} y={h - 8} textAnchor="middle" fontSize="10" fill="rgb(28 26 51 / 0.55)">
               {d.week}
             </text>
           </g>
         );
       })}
-      <polyline points={line} fill="none" stroke="#f2c879" strokeWidth="2.5" strokeLinejoin="round" />
+      <polyline points={line} fill="none" stroke="#f5a524" strokeWidth="2.5" strokeLinejoin="round" />
       {adoptionHistory.map((d, i) => (
-        <circle key={d.week} cx={bx(i) + step * 0.3} cy={ly(d.activeRate)} r="3.5" fill="#f2c879" />
+        <circle key={d.week} cx={bx(i) + step * 0.3} cy={ly(d.activeRate)} r="3.5" fill="#f5a524" />
       ))}
-      <text x={bx(adoptionHistory.length - 1) + step * 0.3} y={ly(adoptionHistory.at(-1).activeRate) - 10} textAnchor="middle" fontSize="11" fontWeight="600" fill="#f2c879">
+      <text x={bx(adoptionHistory.length - 1) + step * 0.3} y={ly(adoptionHistory.at(-1).activeRate) - 10} textAnchor="middle" fontSize="11" fontWeight="600" fill="#f5a524">
         {pct(adoptionHistory.at(-1).activeRate)}
       </text>
     </svg>
@@ -89,9 +89,9 @@ function AdoptionChart() {
 }
 
 function heatColor(gap) {
-  if (gap === 0) return 'rgb(74 222 128 / 0.22)';
-  if (gap === 1) return 'rgb(230 178 92 / 0.32)';
-  return 'rgb(255 143 143 / 0.4)';
+  if (gap === 0) return '#d9f2e3';
+  if (gap === 1) return '#ffe9bf';
+  return '#fbd3d4';
 }
 
 export default function Team({ reps, state, onApprove, onReturn, onNudge }) {
@@ -115,13 +115,13 @@ export default function Team({ reps, state, onApprove, onReturn, onNudge }) {
 
   return (
     <div className="grid grid-cols-1 gap-4">
-      <GlassCard className="flex flex-wrap items-center justify-between gap-3 p-3" lift={false}>
+      <Card className="flex flex-wrap items-center justify-between gap-3 p-3">
         <div className="flex flex-wrap gap-1.5">
           {[{ id: 'all', name: 'All teams' }, ...teams].map((t) => (
             <button
               key={t.id}
               onClick={() => setTeamId(t.id)}
-              className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${teamId === t.id ? 'bg-white text-[#0f1524]' : 'text-muted hover:bg-white/10 hover:text-ink'}`}
+              className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${teamId === t.id ? 'bg-brand text-white' : 'text-muted hover:bg-ink/5 hover:text-ink'}`}
             >
               {t.name}
             </button>
@@ -130,31 +130,31 @@ export default function Team({ reps, state, onApprove, onReturn, onNudge }) {
         <Button variant="secondary" onClick={download} className="py-1.5 text-xs">
           <LuDownload size={14} /> Export skills matrix (CSV)
         </Button>
-      </GlassCard>
+      </Card>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {[
-          { icon: LuUsers, tone: 'text-[#a9c1ff]', label: 'Active this week', value: pct(adopt.activeRate), sub: `${adopt.active} of ${adopt.total} people` },
-          { icon: LuFlame, tone: 'text-[#ff9f5a]', label: 'Average streak', value: `${adopt.avgStreak.toFixed(1)} days`, sub: 'Days in a row with learning' },
+          { icon: LuUsers, tone: 'text-brand', label: 'Active this week', value: pct(adopt.activeRate), sub: `${adopt.active} of ${adopt.total} people` },
+          { icon: LuFlame, tone: 'text-flame', label: 'Average streak', value: `${adopt.avgStreak.toFixed(1)} days`, sub: 'Days in a row with learning' },
           { icon: LuListChecks, tone: 'text-gold', label: 'Quests this week', value: adopt.questsThisWeek, sub: 'Lessons, quizzes and challenges' },
           { icon: LuRocket, tone: ready >= 0.5 ? 'text-pass' : 'text-fail', label: 'Lumeva launch ready', value: pct(ready), sub: 'All launch skills at target' },
         ].map((k, i) => (
-          <GlassCard key={k.label} className="p-4" delay={0.04 * i}>
+          <Card key={k.label} className="p-4" delay={0.04 * i}>
             <Stat {...k} />
-          </GlassCard>
+          </Card>
         ))}
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-        <GlassCard className="p-5 lg:col-span-7" lift={false}>
+        <Card className="p-5 lg:col-span-7">
           <CardHeader title="Skills in demand vs skills lacking" subtitle="Bubble size = average gap. Top right is where training helps most." />
           <DemandMatrix insights={insights} />
-        </GlassCard>
-        <GlassCard className="p-5 lg:col-span-5" delay={0.05} lift={false}>
+        </Card>
+        <Card className="p-5 lg:col-span-5" delay={0.05}>
           <CardHeader title="Where to focus training" subtitle="Ranked by demand × average gap" />
           <ol className="mt-3 space-y-1.5">
             {insights.slice(0, 6).map((it, i) => (
-              <li key={it.skill.id} className="glass-inset flex items-center gap-3 rounded-xl px-3 py-2.5">
+              <li key={it.skill.id} className="card-inset flex items-center gap-3 rounded-xl px-3 py-2.5">
                 <span className="w-4 text-xs font-semibold text-muted">{i + 1}</span>
                 <span className="size-2 shrink-0 rounded-full" style={{ background: categoryById[it.skill.category].color }} />
                 <span className="min-w-0 flex-1">
@@ -167,10 +167,10 @@ export default function Team({ reps, state, onApprove, onReturn, onNudge }) {
               </li>
             ))}
           </ol>
-        </GlassCard>
+        </Card>
       </div>
 
-      <GlassCard className="p-5" lift={false}>
+      <Card className="p-5">
         <CardHeader title="Skills heatmap" subtitle="Current level in each cell. Colour shows the gap to the role target.">
           <div className="hidden items-center gap-3 text-[11px] text-muted sm:flex">
             {[
@@ -184,11 +184,11 @@ export default function Team({ reps, state, onApprove, onReturn, onNudge }) {
             ))}
           </div>
         </CardHeader>
-        <div className="scroll-glass mt-4 overflow-x-auto">
-          <table className="border-separate border-spacing-1 text-xs">
+        <div className="scroll-card mt-4 overflow-x-auto">
+          <table className="w-full border-separate border-spacing-1 text-xs">
             <thead>
               <tr>
-                <th className="sticky left-0 z-10 bg-[#131b2f] px-2 text-left font-medium text-muted">Rep</th>
+                <th className="sticky left-0 z-10 w-0 bg-white px-2 text-left font-medium text-muted">Rep</th>
                 {skills.map((s) => (
                   <th key={s.id} className="h-28 w-11 min-w-11 align-bottom font-medium text-muted">
                     <span className="mx-auto block w-4 rotate-180 text-left whitespace-nowrap [writing-mode:vertical-rl]">{s.name}</span>
@@ -199,7 +199,7 @@ export default function Team({ reps, state, onApprove, onReturn, onNudge }) {
             <tbody>
               {group.map((rep) => (
                 <tr key={rep.id}>
-                  <td className="sticky left-0 z-10 bg-[#131b2f] pr-2">
+                  <td className="sticky left-0 z-10 bg-white pr-2">
                     <span className="flex items-center gap-2 whitespace-nowrap">
                       <Avatar id={rep.id} size={22} /> {rep.name}
                     </span>
@@ -225,26 +225,26 @@ export default function Team({ reps, state, onApprove, onReturn, onNudge }) {
             </tbody>
           </table>
         </div>
-      </GlassCard>
+      </Card>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-        <GlassCard className="p-5 lg:col-span-5" lift={false}>
+        <Card className="p-5 lg:col-span-5">
           <CardHeader title="Adoption" subtitle="Last 8 weeks, whole field force">
             <span className="flex items-center gap-3 text-[11px] text-muted">
               <span className="flex items-center gap-1">
-                <span className="h-0.5 w-3 bg-gold" /> Active
+                <span className="h-0.5 w-3 bg-amber" /> Active
               </span>
               <span className="flex items-center gap-1">
-                <span className="size-2.5 rounded-sm bg-[#5b86f0]/40" /> Quests
+                <span className="size-2.5 rounded-sm bg-brand/25" /> Quests
               </span>
             </span>
           </CardHeader>
           <div className="mt-3">
             <AdoptionChart />
           </div>
-        </GlassCard>
+        </Card>
 
-        <GlassCard className="p-5 lg:col-span-4" delay={0.05} lift={false}>
+        <Card className="p-5 lg:col-span-4" delay={0.05}>
           <CardHeader title="Waiting for your review" subtitle="Role-plays and field challenges" />
           <div className="mt-3 space-y-2">
             {pending.length === 0 && <p className="text-sm text-muted">Nothing to review. All caught up.</p>}
@@ -252,7 +252,7 @@ export default function Team({ reps, state, onApprove, onReturn, onNudge }) {
               const quest = questById[p.questId];
               const Icon = QUEST_ICONS[quest.type];
               return (
-                <div key={`${p.repId}-${p.questId}`} className="glass-inset rounded-xl p-3">
+                <div key={`${p.repId}-${p.questId}`} className="card-inset rounded-xl p-3">
                   <div className="flex items-start gap-2.5">
                     <Avatar id={p.repId} size={28} />
                     <div className="min-w-0 flex-1">
@@ -274,26 +274,26 @@ export default function Team({ reps, state, onApprove, onReturn, onNudge }) {
               );
             })}
           </div>
-        </GlassCard>
+        </Card>
 
-        <GlassCard className="p-5 lg:col-span-3" delay={0.1} lift={false}>
+        <Card className="p-5 lg:col-span-3" delay={0.1}>
           <CardHeader title="Needs a nudge" subtitle="No learning in 7+ days" />
           <div className="mt-3 space-y-2">
             {adopt.inactive.length === 0 && <p className="text-sm text-muted">Everyone learned this week.</p>}
             {adopt.inactive.map((r) => (
-              <div key={r.id} className="glass-inset flex items-center gap-2.5 rounded-xl p-2.5">
+              <div key={r.id} className="card-inset flex items-center gap-2.5 rounded-xl p-2.5">
                 <Avatar id={r.id} size={28} />
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-medium">{r.name}</div>
                   <div className="text-[11px] text-muted">Last active {r.activeDaysAgo} days ago</div>
                 </div>
-                <button onClick={() => onNudge(r)} aria-label={`Nudge ${r.name}`} className="grid size-8 place-items-center rounded-full text-gold hover:bg-white/10">
+                <button onClick={() => onNudge(r)} aria-label={`Nudge ${r.name}`} className="grid size-8 place-items-center rounded-full text-gold hover:bg-ink/5">
                   <LuBellRing size={15} />
                 </button>
               </div>
             ))}
           </div>
-        </GlassCard>
+        </Card>
       </div>
     </div>
   );

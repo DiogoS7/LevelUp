@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import Scene from './components/Scene.jsx';
-import { TopBar, SideDock, Toasts, LevelUpModal, TABS } from './components/Chrome.jsx';
+import { Sidebar, PageHeader, Toasts, LevelUpModal, TABS } from './components/Chrome.jsx';
 import QuestPlayer from './components/QuestPlayer.jsx';
 import SkillDetail from './components/SkillDetail.jsx';
 import Home from './views/Home.jsx';
@@ -165,14 +164,14 @@ export default function App() {
 
   return (
     <>
-      <Scene />
-      <div className="relative z-10 mx-auto max-w-[1360px] px-3 pt-3 pb-28 sm:px-5 md:pb-10">
-        <TopBar rep={rep} onRep={setRepId} onReset={reset} tab={tab} />
-        <div className="mt-4 flex gap-4">
-          <SideDock tab={tab} onTab={goTo} pendingCount={game.pending.length} />
-          <main className="min-w-0 flex-1" key={`${tab}-${repId}`}>
+      <div className="backdrop" aria-hidden="true" />
+      <Sidebar tab={tab} onTab={goTo} pendingCount={game.pending.length} onReset={reset} />
+      <div className="relative z-10 px-3 pt-2 pb-24 sm:px-5 md:ml-64 md:pb-10 md:pl-4 lg:pr-6">
+        <div className="mx-auto max-w-[1280px]">
+          <PageHeader rep={rep} onRep={setRepId} onReset={reset} tab={tab} />
+          <main className="mt-4 min-w-0" key={`${tab}-${repId}`}>
             {view}
-            <footer className="mt-8 text-center text-[11px] text-faint">
+            <footer className="mt-8 text-center text-xs text-faint">
               LevelUp · a portfolio project by Diogo Santos · {company.name} and all data are fictional
             </footer>
           </main>

@@ -83,12 +83,15 @@ LevelUp tackles both. Gamification drives adoption: quests take 3 to 15 minutes,
 
 | | |
 |---|---|
-| UI | React 19, Tailwind CSS v4 (custom `glass` utility), Framer Motion |
+| UI | React 19, Tailwind CSS v4 (custom `card` utility), Framer Motion |
+| Type | [Outfit](https://fonts.google.com/specimen/Outfit), self-hosted (SIL Open Font License) |
 | Icons | Lucide, via `react-icons/lu` |
 | Charts | Hand-written SVG (radar, demand matrix, adoption trend), no chart library |
 | Build | Vite 7 |
 | Tests | Vitest unit tests for every game rule (`src/lib/game.test.js`) |
 | CI/CD | GitHub Actions runs the tests and the build on every push and PR, then deploys `main` to GitHub Pages |
+
+The look is light and warm on purpose, closer to a consumer learning app than a business dashboard: white cards on a paper background with a faint dot grid, a violet brand colour, amber for XP and rewards, and hexagon badges that echo the logo.
 
 ## Getting started
 
@@ -117,7 +120,8 @@ Then open http://localhost:5173.
 src/
 ├── App.jsx                # Game state, persistence, toasts and level-up celebrations
 ├── components/
-│   ├── Chrome.jsx         # Top bar, rep switcher, dock, toasts, level-up modal
+│   ├── Card.jsx
+│   ├── Chrome.jsx         # Sidebar, bottom tabs, page header, rep switcher, toasts, level-up modal
 │   ├── QuestPlayer.jsx    # Lessons, playable quizzes and review submissions
 │   ├── QuestCard.jsx
 │   ├── SkillDetail.jsx

@@ -5,20 +5,21 @@ import { reps } from '../data/academy.js';
 
 const repById = Object.fromEntries(reps.map((r) => [r.id, r]));
 
-/** LevelUp mark: a blue ring with two gold chevrons climbing out of it. */
+/** LevelUp mark: a violet hexagon badge with a white arrow climbing a step. */
 export function LogoMark({ size = 36, className = '' }) {
   const id = useId();
   return (
     <svg viewBox="0 0 64 64" width={size} height={size} className={className} aria-hidden="true">
       <defs>
-        <linearGradient id={`${id}-ring`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#a9c1ff" />
-          <stop offset="1" stopColor="#3a62d8" />
+        <linearGradient id={`${id}-hex`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#7b5cf0" />
+          <stop offset="1" stopColor="#4a2fc0" />
         </linearGradient>
       </defs>
-      <path d="M44 13.5A21 21 0 1 0 53 32" fill="none" stroke={`url(#${id}-ring)`} strokeWidth="6" strokeLinecap="round" />
-      <path d="M22 40 32 30 42 40" fill="none" stroke="#f2c879" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M22 28 32 18 42 28" fill="none" stroke="#f2c879" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" opacity="0.55" />
+      <path d="M32 3 57 17.5v29L32 61 7 46.5v-29z" fill={`url(#${id}-hex)`} />
+      <path d="M18 44h10v-9h10v-9" fill="none" stroke="#fff" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M40 17h7v7" fill="none" stroke="#ffc94d" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M38 26 47 17" stroke="#ffc94d" strokeWidth="5" strokeLinecap="round" />
     </svg>
   );
 }
@@ -30,7 +31,7 @@ export function Avatar({ id, size = 28, className = '' }) {
   return (
     <span
       title={rep?.name ?? id}
-      className={`inline-grid shrink-0 place-items-center rounded-full font-bold text-white shadow-[0_0_0_1.5px_rgba(255,255,255,0.28),0_2px_6px_rgba(0,0,0,0.25)] ${className}`}
+      className={`inline-grid shrink-0 place-items-center rounded-full font-bold text-white shadow-[0_0_0_2px_#fff,0_2px_6px_rgba(28,26,51,0.18)] ${className}`}
       style={{ width: size, height: size, fontSize: Math.max(9, size * 0.36), background: `linear-gradient(135deg, ${from}, ${to})` }}
     >
       {id}
@@ -48,7 +49,7 @@ export function Bar({ value, tone, height = 8, label, className = '' }) {
       aria-valuemax={100}
       aria-valuenow={pct}
       aria-label={label}
-      className={`overflow-hidden rounded-full bg-white/10 ${className}`}
+      className={`overflow-hidden rounded-full bg-ink/8 ${className}`}
       style={{ height }}
     >
       <div className={`h-full rounded-full ${tone ? 'bar-fill' : 'xp-fill'}`} style={{ width: `${pct}%`, background: tone }} />
@@ -57,7 +58,7 @@ export function Bar({ value, tone, height = 8, label, className = '' }) {
 }
 
 /** Five level pips with a marker on the target level. */
-export function LevelPips({ level, target, color = '#5b86f0', size = 10 }) {
+export function LevelPips({ level, target, color = '#5b3fd6', size = 10 }) {
   return (
     <div className="flex items-center gap-1" aria-label={`Level ${level} of 5, target ${target}`}>
       {[1, 2, 3, 4, 5].map((n) => {
@@ -71,8 +72,8 @@ export function LevelPips({ level, target, color = '#5b86f0', size = 10 }) {
             style={{
               width: size * 1.6,
               height: size,
-              background: filled ? color : missing ? 'rgb(255 143 143 / 0.18)' : 'rgb(255 255 255 / 0.08)',
-              boxShadow: isTarget ? '0 0 0 1.5px rgb(245 243 240 / 0.8)' : undefined,
+              background: filled ? color : missing ? 'rgb(220 61 67 / 0.16)' : 'rgb(28 26 51 / 0.07)',
+              boxShadow: isTarget ? '0 0 0 1.5px #fff, 0 0 0 3px rgb(28 26 51 / 0.55)' : undefined,
             }}
           />
         );
@@ -83,12 +84,12 @@ export function LevelPips({ level, target, color = '#5b86f0', size = 10 }) {
 
 export function Chip({ children, tone = 'default', className = '' }) {
   const tones = {
-    default: 'bg-white/8 text-muted border-white/12',
-    critical: 'bg-[#ff8f8f]/12 text-fail border-[#ff8f8f]/30',
-    demand: 'bg-[#e6b25c]/12 text-gold border-[#e6b25c]/30',
-    mandatory: 'bg-[#8b7bff]/14 text-[#b9b0ff] border-[#8b7bff]/30',
-    good: 'bg-[#4ade80]/12 text-pass border-[#4ade80]/30',
-    info: 'bg-[#5b86f0]/14 text-[#a9c1ff] border-[#5b86f0]/30',
+    default: 'bg-ink/5 text-muted border-ink/10',
+    critical: 'bg-[#dc3d43]/8 text-fail border-[#dc3d43]/25',
+    demand: 'bg-[#f5a524]/12 text-gold border-[#f5a524]/35',
+    mandatory: 'bg-brand-soft text-brand border-brand/25',
+    good: 'bg-[#15924a]/8 text-pass border-[#15924a]/25',
+    info: 'bg-brand-soft text-brand border-brand/20',
   };
   return (
     <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap ${tones[tone]} ${className}`}>
@@ -113,7 +114,7 @@ export function Modal({ open, onClose, title, children, wide = false }) {
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-50 grid place-items-center bg-[#05080f]/60 p-3 backdrop-blur-sm"
+          className="fixed inset-0 z-50 grid place-items-center bg-[#1c1a33]/35 p-3 backdrop-blur-[3px]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -129,11 +130,11 @@ export function Modal({ open, onClose, title, children, wide = false }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.25 }}
-            className={`glass max-h-[90vh] w-full overflow-y-auto rounded-[22px] bg-[#111a2e]/90 p-5 outline-none sm:p-6 ${wide ? 'max-w-2xl' : 'max-w-lg'}`}
+            className={`card max-h-[90vh] w-full overflow-y-auto rounded-3xl p-5 outline-none sm:p-6 ${wide ? 'max-w-2xl' : 'max-w-lg'}`}
           >
             <div className="mb-4 flex items-start justify-between gap-3">
               <h2 className="text-lg font-semibold">{title}</h2>
-              <button onClick={onClose} aria-label="Close" className="grid size-8 shrink-0 place-items-center rounded-full text-muted hover:bg-white/10 hover:text-ink">
+              <button onClick={onClose} aria-label="Close" className="grid size-8 shrink-0 place-items-center rounded-full text-muted hover:bg-ink/5 hover:text-ink">
                 <LuX size={18} />
               </button>
             </div>
@@ -147,13 +148,13 @@ export function Modal({ open, onClose, title, children, wide = false }) {
 
 export function Button({ children, variant = 'primary', className = '', ...rest }) {
   const styles = {
-    primary: 'bg-gold text-[#1a1406] hover:bg-[#ffd994] font-semibold',
-    secondary: 'bg-white/10 text-ink hover:bg-white/16 border border-white/14',
-    ghost: 'text-muted hover:text-ink hover:bg-white/8',
+    primary: 'bg-brand text-white hover:bg-[#4a2fc0] font-semibold shadow-[0_6px_16px_-6px_rgb(91_63_214_/_0.7)]',
+    secondary: 'bg-white text-ink hover:bg-ink/5 border border-ink/12',
+    ghost: 'text-muted hover:text-ink hover:bg-ink/5',
   };
   return (
     <button
-      className={`inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm transition disabled:cursor-not-allowed disabled:opacity-40 ${styles[variant]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm transition disabled:cursor-not-allowed disabled:opacity-40 ${styles[variant]} ${className}`}
       {...rest}
     >
       {children}
@@ -166,12 +167,12 @@ export function Stat({ icon: Icon, label, value, sub, tone = 'text-ink' }) {
   return (
     <div className="flex items-center gap-3">
       {Icon && (
-        <span className="glass-inset grid size-10 shrink-0 place-items-center rounded-xl">
+        <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-brand-soft">
           <Icon size={18} className={tone} />
         </span>
       )}
       <div className="min-w-0">
-        <div className="text-[11px] tracking-wide text-faint uppercase">{label}</div>
+        <div className="text-xs text-muted">{label}</div>
         <div className="text-lg leading-tight font-semibold">{value}</div>
         {sub && <div className="truncate text-xs text-muted">{sub}</div>}
       </div>

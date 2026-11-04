@@ -41,7 +41,7 @@ function Reading({ quest, onFinish }) {
     <div>
       <ul className="space-y-3">
         {quest.body.map((line) => (
-          <li key={line} className="glass-inset rounded-xl px-4 py-3 text-sm leading-relaxed text-ink/90">
+          <li key={line} className="card-inset rounded-xl px-4 py-3 text-sm leading-relaxed text-ink/85">
             {line}
           </li>
         ))}
@@ -80,7 +80,7 @@ function Quiz({ quest, onFinish }) {
     const perfect = score === total;
     return (
       <div className="py-2 text-center">
-        <div className={`mx-auto grid size-20 place-items-center rounded-full text-2xl font-bold ${passed ? 'medal-earned text-[#1a1406]' : 'glass-inset text-fail'}`}>
+        <div className={`mx-auto grid size-20 place-items-center text-2xl font-bold ${passed ? 'hex medal-earned' : 'rounded-full card-inset text-fail'}`}>
           {score}/{total}
         </div>
         <h3 className="mt-4 text-lg font-semibold">{perfect ? 'Perfect score!' : passed ? 'Quiz passed' : 'Not quite yet'}</h3>
@@ -131,7 +131,7 @@ function Quiz({ quest, onFinish }) {
       </div>
       <div className="mb-4 flex gap-1.5">
         {quest.questions.map((q, i) => (
-          <span key={q.q} className={`h-1.5 flex-1 rounded-full ${i < index ? 'bg-gold' : i === index ? 'bg-white/50' : 'bg-white/10'}`} />
+          <span key={q.q} className={`h-1.5 flex-1 rounded-full ${i < index ? 'bg-brand' : i === index ? 'bg-brand/40' : 'bg-ink/8'}`} />
         ))}
       </div>
       <p className="mb-4 text-[15px] font-medium">{question.q}</p>
@@ -139,10 +139,10 @@ function Quiz({ quest, onFinish }) {
         {question.options.map((option, i) => {
           const isAnswer = i === question.answer;
           const isPicked = i === picked;
-          let style = 'glass-inset hover:bg-white/10';
-          if (answered && isAnswer) style = 'border border-[#4ade80]/50 bg-[#4ade80]/12';
-          else if (answered && isPicked) style = 'border border-[#ff8f8f]/50 bg-[#ff8f8f]/12';
-          else if (answered) style = 'glass-inset opacity-60';
+          let style = 'card-inset hover:border-brand/30 hover:bg-brand-soft';
+          if (answered && isAnswer) style = 'border border-[#15924a]/50 bg-[#15924a]/8';
+          else if (answered && isPicked) style = 'border border-[#dc3d43]/50 bg-[#dc3d43]/8';
+          else if (answered) style = 'card-inset opacity-60';
           return (
             <button
               key={option}

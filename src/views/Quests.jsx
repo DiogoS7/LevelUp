@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import GlassCard from '../components/GlassCard.jsx';
+import Card from '../components/Card.jsx';
 import QuestCard from '../components/QuestCard.jsx';
 import { QUEST_ICONS } from '../components/ui.jsx';
 import { quests, QUEST_TYPES, categories, skillById } from '../data/academy.js';
@@ -25,11 +25,11 @@ export default function Quests({ rep, state, onStart }) {
   });
 
   const pill = (active) =>
-    `rounded-full px-3 py-1.5 text-xs font-medium transition ${active ? 'bg-white text-[#0f1524]' : 'text-muted hover:bg-white/10 hover:text-ink'}`;
+    `rounded-full px-3 py-1.5 text-xs font-medium transition ${active ? 'bg-brand text-white' : 'text-muted hover:bg-ink/5 hover:text-ink'}`;
 
   return (
     <div className="grid grid-cols-1 gap-4">
-      <GlassCard className="flex flex-col gap-3 p-4" lift={false}>
+      <Card className="flex flex-col gap-3 p-4">
         <div className="flex flex-wrap items-center gap-1.5">
           {[
             ['open', 'To do · best first'],
@@ -64,12 +64,12 @@ export default function Quests({ rep, state, onStart }) {
             </button>
           ))}
         </div>
-      </GlassCard>
+      </Card>
 
       {list.length === 0 ? (
-        <GlassCard className="p-8 text-center text-sm text-muted" lift={false}>
+        <Card className="p-8 text-center text-sm text-muted">
           No quests match these filters.
-        </GlassCard>
+        </Card>
       ) : (
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {list.map((q) => (

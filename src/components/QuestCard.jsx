@@ -13,8 +13,8 @@ export default function QuestCard({ quest, status = 'open', reason, onStart, com
     <button
       onClick={() => !done && !pending && onStart(quest)}
       disabled={done || pending}
-      className={`group glass-inset flex w-full items-start gap-3 rounded-2xl p-3.5 text-left transition ${
-        done || pending ? 'cursor-default opacity-70' : 'hover:border-white/25 hover:bg-white/10'
+      className={`group card-inset flex w-full items-start gap-3 rounded-2xl p-3.5 text-left transition ${
+        done || pending ? 'cursor-default opacity-70' : 'hover:border-ink/20 hover:bg-ink/5'
       }`}
     >
       <span className="grid size-10 shrink-0 place-items-center rounded-xl" style={{ background: `${color}26`, color }}>
@@ -46,7 +46,7 @@ export default function QuestCard({ quest, status = 'open', reason, onStart, com
             </Chip>
           )}
           {!done && !pending && (
-            <span className="ml-auto flex items-center gap-1 text-[11px] font-semibold text-[#a9c1ff] opacity-0 transition group-hover:opacity-100 max-md:opacity-100">
+            <span className="ml-auto flex items-center gap-1 text-[11px] font-semibold text-brand opacity-0 transition group-hover:opacity-100 max-md:opacity-100">
               <LuPlay size={11} /> Start
             </span>
           )}

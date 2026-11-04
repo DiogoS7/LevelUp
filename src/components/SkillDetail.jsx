@@ -34,7 +34,7 @@ function Body({ skill, rep, reps, state, onStart }) {
       </div>
       <p className="mt-3 text-sm text-ink/85">{skill.description}</p>
       {skill.reason && (
-        <p className="mt-3 flex gap-2 rounded-xl border border-[#e6b25c]/25 bg-[#e6b25c]/8 px-3.5 py-2.5 text-sm text-ink/90">
+        <p className="mt-3 flex gap-2 rounded-xl border border-[#f5a524]/25 bg-[#f5a524]/8 px-3.5 py-2.5 text-sm text-ink/85">
           <LuTrendingUp className="mt-0.5 shrink-0 text-gold" size={16} />
           <span>
             <b className="text-gold">Why it matters now:</b> {skill.reason}
@@ -43,7 +43,7 @@ function Body({ skill, rep, reps, state, onStart }) {
       )}
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <div className="glass-inset rounded-xl p-4">
+        <div className="card-inset rounded-xl p-4">
           <div className="text-[11px] tracking-wide text-faint uppercase">Your level</div>
           <div className="mt-1 flex items-center justify-between gap-2">
             <span className="text-lg font-semibold">
@@ -61,12 +61,12 @@ function Body({ skill, rep, reps, state, onStart }) {
             </>
           )}
         </div>
-        <div className="glass-inset rounded-xl p-4">
+        <div className="card-inset rounded-xl p-4">
           <div className="text-[11px] tracking-wide text-faint uppercase">Across the field force</div>
           <div className="mt-1 text-lg font-semibold">
             {atTarget} of {reps.length} at target
           </div>
-          <Bar value={atTarget / reps.length} tone="linear-gradient(90deg,#1f7a80,#4fc3c9)" className="mt-3" height={6} label="Colleagues at target" />
+          <Bar value={atTarget / reps.length} tone="linear-gradient(90deg,#0e9a9a,#2cc5b8)" className="mt-3" height={6} label="Colleagues at target" />
           <div className="mt-2 text-xs text-muted">
             {atTarget / reps.length < 0.5 ? 'Most colleagues are still building this skill too.' : 'Most colleagues already meet the target.'}
           </div>
