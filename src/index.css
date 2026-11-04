@@ -1,0 +1,208 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --color-ink: #f5f3f0;
+  --color-muted: rgb(245 243 240 / 0.58);
+  --color-faint: rgb(245 243 240 / 0.36);
+  --color-pass: #4ade80;
+  --color-fail: #ff8f8f;
+  --color-blocked: #fcd34d;
+  --color-accent: #5b86f0;
+  --color-amber: #e6b25c;
+  --color-violet: #8b7bff;
+  --color-gold: #f2c879;
+  --color-teal: #4fc3c9;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+  body {
+    @apply bg-[#0b1020] font-sans text-ink antialiased;
+    overflow-x: hidden;
+  }
+  button {
+    cursor: pointer;
+  }
+}
+
+/* Frosted glass surface used by every card, pill and dock. */
+@utility glass {
+  position: relative;
+  background:
+    linear-gradient(160deg, rgb(255 255 255 / 0.1) 0%, rgb(255 255 255 / 0.02) 100%),
+    rgb(21 28 46 / 0.55);
+  backdrop-filter: blur(26px) saturate(140%);
+  -webkit-backdrop-filter: blur(26px) saturate(140%);
+  border: 1px solid rgb(255 255 255 / 0.14);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.18),
+    inset 0 -1px 0 rgb(0 0 0 / 0.15),
+    0 20px 50px -20px rgb(0 0 0 / 0.55);
+}
+
+@utility glass-inset {
+  background: rgb(255 255 255 / 0.06);
+  border: 1px solid rgb(255 255 255 / 0.12);
+}
+
+/* ---------- Background: plain deep navy with one soft cobalt light ---------- */
+.scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: radial-gradient(120% 75% at 50% -12%, #18223f 0%, #0f1628 45%, #0b1020 100%);
+}
+.scene > * {
+  position: absolute;
+}
+.scene .glow {
+  border-radius: 50%;
+  filter: blur(130px);
+}
+.scene .glow-cobalt {
+  width: min(1100px, 70vw);
+  height: min(700px, 55vh);
+  left: 50%;
+  top: -28%;
+  transform: translateX(-50%);
+  background: #3a62d8;
+  opacity: 0.28;
+}
+.scene .grid-lines {
+  inset: 0;
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.025) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(80% 60% at 50% 20%, #000 20%, transparent 75%);
+  -webkit-mask-image: radial-gradient(80% 60% at 50% 20%, #000 20%, transparent 75%);
+}
+.scene .vignette {
+  inset: 0;
+  background: linear-gradient(180deg, transparent 55%, rgb(5 8 16 / 0.45) 100%);
+}
+
+/* Dock tooltip */
+.dock-btn[data-tip]:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 52px;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  font-size: 11px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: rgb(17 23 40 / 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgb(255 255 255 / 0.14);
+  color: var(--color-ink);
+  pointer-events: none;
+}
+@media (max-width: 767px) {
+  .dock-btn[data-tip]:hover::after {
+    display: none;
+  }
+}
+
+/* Thin, glassy scrollbar for tables */
+.scroll-glass::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+.scroll-glass::-webkit-scrollbar-thumb {
+  background: rgb(255 255 255 / 0.18);
+  border-radius: 99px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- LevelUp game layer ---------- */
+
+/* XP bar: gold fill with a slow moving shine. */
+.xp-fill {
+  background: linear-gradient(90deg, #c8913a, #f2c879 60%, #ffe3a8);
+  position: relative;
+  overflow: hidden;
+  transition: width 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.xp-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 20%, rgb(255 255 255 / 0.45) 50%, transparent 80%);
+  transform: translateX(-100%);
+  animation: shine 3.2s ease-in-out infinite;
+}
+@keyframes shine {
+  60%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.bar-fill {
+  transition: width 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Flame flicker for streaks. */
+.flicker {
+  animation: flicker 1.8s ease-in-out infinite;
+  transform-origin: 50% 90%;
+}
+@keyframes flicker {
+  0%,
+  100% {
+    transform: scale(1) rotate(-2deg);
+  }
+  50% {
+    transform: scale(1.08) rotate(2deg);
+  }
+}
+
+/* Confetti for level-ups. */
+.confetti {
+  position: absolute;
+  top: -10px;
+  width: 8px;
+  height: 14px;
+  border-radius: 2px;
+  animation: fall 1.8s cubic-bezier(0.3, 0.6, 0.4, 1) forwards;
+}
+@keyframes fall {
+  to {
+    transform: translateY(420px) rotate(540deg);
+    opacity: 0;
+  }
+}
+
+/* Badge medal glow when earned. */
+.medal-earned {
+  background: radial-gradient(circle at 35% 30%, #ffe3a8, #e6b25c 45%, #9a6a22 100%);
+  box-shadow:
+    0 0 0 2px rgb(255 255 255 / 0.18),
+    0 6px 18px -4px rgb(230 178 92 / 0.6);
+}
+.medal-locked {
+  background: rgb(255 255 255 / 0.06);
+  border: 1px dashed rgb(255 255 255 / 0.2);
+}
+
+/* Heatmap cell focus ring. */
+.heat-cell:focus-visible {
+  outline: 2px solid #f5f3f0;
+  outline-offset: 1px;
+}
