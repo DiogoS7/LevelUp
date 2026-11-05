@@ -137,7 +137,7 @@ Every rule lives in `lib/game.js` as a pure function, so it is tested without re
 
 ## Why I built it
 
-Getting people to actually use a learning tool is hard, and so is knowing which skills a sales team is missing. I wanted to show how I'd approach both as a business analyst and QA consultant: turn the business need into clear rules (targets per role, demand per skill, what earns XP), keep those rules testable, and design the experience so that using it feels rewarding rather than mandatory. It sits alongside my Power Platform ([Houston](https://github.com/DiogoS7/Houston)), Salesforce ([Launchpad](https://github.com/DiogoS7/Launchpad)) and React ([QualityView](https://github.com/DiogoS7/QualityView)) projects.
+Getting people to actually use a learning tool is hard, and so is knowing which skills a sales team is missing. I wanted to show how I'd approach both as a business analyst and QA consultant: turn the business need into clear rules (targets per role, demand per skill, what earns XP), keep those rules testable, and design the experience so that using it feels rewarding rather than mandatory.
 
 ## License
 
