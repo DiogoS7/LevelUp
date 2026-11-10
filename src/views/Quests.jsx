@@ -24,52 +24,65 @@ export default function Quests({ rep, state, onStart }) {
     return true;
   });
 
-  const pill = (active) =>
-    `rounded-full px-3 py-1.5 text-xs font-medium transition ${active ? 'bg-brand text-white' : 'text-muted hover:bg-ink/5 hover:text-ink'}`;
+  const done = quests.filter((q) => questStatus(state, rep.id, q.id) !== 'open').length;
+  const select = 'rounded-xl border border-line bg-surface px-3 py-2 text-sm text-ink';
 
   return (
     <div className="grid grid-cols-1 gap-4">
-      <Card className="flex flex-col gap-3 p-4">
-        <div className="flex flex-wrap items-center gap-1.5">
+      <section className="pt-2 pb-2">
+        <span className="inline-block rounded-full bg-brand-soft px-3 py-1 text-[13px] font-semibold text-brand">
+          {done} of {quests.length} done
+        </span>
+        <h1 className="mt-4 max-w-3xl text-[34px] leading-[1.08] font-extrabold tracking-tight sm:text-5xl">
+          Learn something <span className="text-brand">in a few minutes.</span>
+        </h1>
+        <p className="mt-3 max-w-2xl text-[17px] text-muted">
+          Quests are short lessons, quizzes and practice tasks. The ones that help you most come first. Each one earns XP and makes a skill stronger.
+        </p>
+      </section>
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="card inline-flex self-start rounded-xl p-1" role="tablist" aria-label="Show">
           {[
-            ['open', 'To do · best first'],
-            ['done', 'Done & in review'],
-            ['all', 'All quests'],
+            ['open', 'To do'],
+            ['done', 'Done'],
+            ['all', 'All'],
           ].map(([id, label]) => (
-            <button key={id} className={pill(show === id)} onClick={() => setShow(id)}>
+            <button
+              key={id}
+              role="tab"
+              aria-selected={show === id}
+              onClick={() => setShow(id)}
+              className={`rounded-lg px-4 py-1.5 text-sm font-medium transition ${show === id ? 'bg-brand text-on-brand' : 'text-muted hover:text-ink'}`}
+            >
               {label}
             </button>
           ))}
         </div>
-        <div className="flex flex-wrap items-center gap-1.5">
-          <button className={pill(type === 'all')} onClick={() => setType('all')}>
-            Every type
-          </button>
-          {Object.entries(QUEST_TYPES).map(([id, t]) => {
-            const Icon = QUEST_ICONS[id];
-            return (
-              <button key={id} className={`${pill(type === id)} inline-flex items-center gap-1.5`} onClick={() => setType(id)}>
-                <Icon size={13} /> {t.label}
-              </button>
-            );
-          })}
+        <div className="flex flex-wrap gap-2">
+          <label className="sr-only" htmlFor="q-area">Skill area</label>
+          <select id="q-area" className={select} value={category} onChange={(e) => setCategory(e.target.value)}>
+            <option value="all">All skill areas</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.label}
+              </option>
+            ))}
+          </select>
+          <label className="sr-only" htmlFor="q-type">Kind of quest</label>
+          <select id="q-type" className={select} value={type} onChange={(e) => setType(e.target.value)}>
+            <option value="all">All kinds</option>
+            {Object.entries(QUEST_TYPES).map(([id, t]) => (
+              <option key={id} value={id}>
+                {t.label}
+              </option>
+            ))}
+          </select>
         </div>
-        <div className="flex flex-wrap items-center gap-1.5">
-          <button className={pill(category === 'all')} onClick={() => setCategory('all')}>
-            Every skill area
-          </button>
-          {categories.map((c) => (
-            <button key={c.id} className={`${pill(category === c.id)} inline-flex items-center gap-1.5`} onClick={() => setCategory(c.id)}>
-              <span className="size-2 rounded-full" style={{ background: c.color }} /> {c.label}
-            </button>
-          ))}
-        </div>
-      </Card>
+      </div>
 
       {list.length === 0 ? (
-        <Card className="p-8 text-center text-sm text-muted">
-          No quests match these filters.
-        </Card>
+        <Card className="p-8 text-center text-sm text-muted">{show === 'done' ? 'Nothing done yet. Your finished quests will show up here.' : 'No quests match these choices.'}</Card>
       ) : (
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {list.map((q) => (
@@ -77,6 +90,26 @@ export default function Quests({ rep, state, onStart }) {
           ))}
         </div>
       )}
+
+      <Card className="p-5">
+        <h2 className="font-bold">The five kinds of quest</h2>
+        <ul className="mt-3 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-5">
+          {Object.entries(QUEST_TYPES).map(([id, t]) => {
+            const Icon = QUEST_ICONS[id];
+            return (
+              <li key={id} className="flex gap-2.5">
+                <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-brand-soft text-brand">
+                  <Icon size={15} />
+                </span>
+                <span>
+                  <b className="block">{t.label}</b>
+                  <span className="text-muted">{t.explain}</span>
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      </Card>
     </div>
   );
 }

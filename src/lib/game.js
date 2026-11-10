@@ -195,9 +195,9 @@ export function reasonFor(rep, quest) {
   const skill = skillById[quest.skill];
   const level = skillLevel(rep.skills[skill.id] ?? 0);
   const target = targetFor(rep, skill.id);
-  if (level >= target) return `Keeps ${skill.name} sharp. You are already at your target.`;
-  const tag = skill.mandatory ? 'a mandatory skill' : skill.demand >= 3 ? 'a critical skill' : skill.demand === 2 ? 'an in-demand skill' : 'your role';
-  return `Closes a gap in ${tag}: ${skill.name} (level ${level} → target ${target}).`;
+  if (level >= target) return `Keeps your ${skill.name.toLowerCase()} sharp. You are already where your role needs you.`;
+  const why = skill.mandatory ? ', which everyone must have' : skill.demand >= 3 ? ', a skill the company needs most right now' : skill.demand === 2 ? ', a skill in demand' : '';
+  return `Builds ${skill.name}${why}. You are at level ${level}; your role needs ${target}.`;
 }
 
 /** Open quests ranked by how much they help this rep close important gaps. */
@@ -264,9 +264,9 @@ export function skillInsights(reps) {
     const avgGap = reps.length ? rows.reduce((s, r) => s + r.gap, 0) / reps.length : 0;
     const avgLevel = reps.length ? rows.reduce((s, r) => s + r.level, 0) / reps.length : 0;
     const urgency = Math.round((skill.demand * avgGap + (skill.mandatory && below ? 1 : 0)) * 10) / 10;
-    let status = 'Healthy';
-    if ((skill.demand >= 3 || skill.mandatory) && share >= 0.5) status = 'Critical';
-    else if (share >= 0.34 || (skill.mandatory && below > 0)) status = 'Watch';
+    let status = 'On track';
+    if ((skill.demand >= 3 || skill.mandatory) && share >= 0.5) status = 'Act now';
+    else if (share >= 0.34 || (skill.mandatory && below > 0)) status = 'Keep an eye on';
     return { skill, below, share, avgGap, avgLevel, urgency, status };
   }).sort((a, b) => b.urgency - a.urgency || b.share - a.share);
 }
@@ -296,6 +296,53 @@ export function challengeProgress(challenge, state) {
     .filter((c) => questById[c.questId].skill === challenge.skill).length;
   const done = challenge.baseDone + extra;
   return { done, goal: challenge.goal, progress: Math.min(1, done / challenge.goal) };
+}
+
+/**
+ * The headlines for a manager, in plain words: biggest gap, launch readiness, adoption and who needs a nudge.
+ * Each finding has a tone (good, warn, bad) and one short sentence.
+ */
+export function teamFindings(reps, state, history = []) {
+  if (!reps.length) return [];
+  const findings = [];
+  const insights = skillInsights(reps);
+  const top = insights[0];
+  if (top && top.below > 0) {
+    findings.push({
+      tone: top.status === 'Act now' ? 'bad' : 'warn',
+      title: `${top.skill.name} is the biggest gap`,
+      text: `${top.below} of ${reps.length} people are below the level their role needs.${top.skill.reason ? ` ${top.skill.reason}` : ''}`,
+    });
+  }
+  const ready = reps.filter(isLaunchReady).length;
+  findings.push({
+    tone: ready / reps.length >= 0.75 ? 'good' : ready / reps.length >= 0.4 ? 'warn' : 'bad',
+    title: `${ready} of ${reps.length} are ready for the Lumeva launch`,
+    text: 'Ready means at the needed level in launch knowledge, clinical data and objection handling.',
+  });
+  const a = adoption(reps, state);
+  if (history.length >= 2) {
+    const first = history[0].activeRate;
+    const last = history.at(-1).activeRate;
+    findings.push({
+      tone: last >= first ? 'good' : 'warn',
+      title: `${Math.round(a.activeRate * 100)}% learned something this week`,
+      text: `Up from ${Math.round(first * 100)}% ${history.length} weeks ago. Short quests and streaks keep people coming back.`,
+    });
+  } else {
+    findings.push({ tone: a.activeRate >= 0.75 ? 'good' : 'warn', title: `${Math.round(a.activeRate * 100)}% learned something this week`, text: 'Counts everyone with at least one quest in the last 7 days.' });
+  }
+  if (a.inactive.length) {
+    const names = a.inactive.map((r) => r.name.split(' ')[0]);
+    findings.push({
+      tone: 'warn',
+      title: `${a.inactive.length} ${a.inactive.length === 1 ? 'person needs' : 'people need'} a nudge`,
+      text: `${names.join(' and ')} ${a.inactive.length === 1 ? 'has' : 'have'} not learned anything in over a week.`,
+    });
+  } else {
+    findings.push({ tone: 'good', title: 'Everyone is learning', text: 'Nobody has been away for more than a week.' });
+  }
+  return findings;
 }
 
 /* -------------------------------------------------------------------- csv */

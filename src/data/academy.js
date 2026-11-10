@@ -194,11 +194,11 @@ export const DEFAULT_REP = 'MR';
  * submitted to the team lead, who approves them in Team insights before XP is awarded.
  */
 export const QUEST_TYPES = {
-  lesson: { label: 'Micro-lesson', approval: false },
-  quiz: { label: 'Quiz', approval: false },
-  roleplay: { label: 'Role-play', approval: true },
-  field: { label: 'Field challenge', approval: true },
-  coaching: { label: 'Peer coaching', approval: false },
+  lesson: { label: 'Lesson', approval: false, explain: 'A few key points to read in about 5 minutes.' },
+  quiz: { label: 'Quiz', approval: false, explain: '3 questions. Get 2 right to pass; all 3 earns a bonus.' },
+  roleplay: { label: 'Practice', approval: true, explain: 'Practise a conversation. Your team lead gives it a quick yes.' },
+  field: { label: 'Real-world task', approval: true, explain: 'Try it with real customers this week, then your lead checks it.' },
+  coaching: { label: 'Learn from others', approval: false, explain: 'Share a tip or shadow a colleague who does it well.' },
 };
 
 export const quests = [

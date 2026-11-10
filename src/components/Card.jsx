@@ -8,7 +8,7 @@ export default function Card({ delay = 0, className = '', children, ...rest }) {
       initial={reduce ? false : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, delay, ease: [0.2, 0.8, 0.2, 1] }}
-      className={`card rounded-3xl ${className}`}
+      className={`card rounded-2xl ${className}`}
       {...rest}
     >
       {children}

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Sidebar, PageHeader, Toasts, LevelUpModal, TABS } from './components/Chrome.jsx';
+import { TopNav, Footer, WelcomeGuide, Toasts, LevelUpModal, TABS } from './components/Chrome.jsx';
 import QuestPlayer from './components/QuestPlayer.jsx';
 import SkillDetail from './components/SkillDetail.jsx';
 import Home from './views/Home.jsx';
@@ -21,6 +21,15 @@ import {
 } from './lib/game.js';
 
 const STORAGE_KEY = 'levelup:v1';
+const SEEN_KEY = 'levelup-welcome-seen';
+
+function seenWelcome() {
+  try {
+    return localStorage.getItem(SEEN_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
 
 // Browser storage can be missing or blocked (private mode, embedded frames), so every access is guarded.
 function load() {
@@ -54,6 +63,16 @@ export default function App() {
   const [openSkill, setOpenSkill] = useState(null);
   const [toasts, setToasts] = useState([]);
   const [celebration, setCelebration] = useState(null);
+  const [guide, setGuide] = useState(() => !seenWelcome());
+
+  const closeGuide = useCallback(() => {
+    setGuide(false);
+    try {
+      localStorage.setItem(SEEN_KEY, '1');
+    } catch {
+      /* fine: the guide shows again next visit */
+    }
+  }, []);
 
   useEffect(() => save({ repId, game }), [repId, game]);
   useEffect(() => {
@@ -107,7 +126,7 @@ export default function App() {
     setActiveQuest(null);
     if (outcome === 'submitted') {
       setGame(next);
-      toast('Sent for review', `Your team lead will review "${quest.title}".`, 'blue');
+      toast('Sent to your team lead', `They will give "${quest.title}" a quick look.`, 'blue');
       return;
     }
     if (outcome !== 'completed') return;
@@ -134,7 +153,7 @@ export default function App() {
 
   const reset = () => {
     setGame(emptyState(initialPending));
-    toast('Demo reset', 'All progress from this browser was cleared.', 'blue');
+    toast('Started again', 'All demo progress in this browser was cleared.', 'blue');
   };
 
   const startQuest = (quest) => {
@@ -147,7 +166,7 @@ export default function App() {
   else if (tab === 'quests') view = <Quests rep={rep} state={game} onStart={startQuest} />;
   else if (tab === 'league') view = <Leaderboard reps={reps} currentId={repId} />;
   else if (tab === 'team')
-    view = <Team reps={reps} state={game} onApprove={approve} onReturn={sendBack} onNudge={(r) => toast('Nudge sent', `${r.name} got a friendly reminder and a 5-minute quest.`, 'blue')} />;
+    view = <Team reps={reps} state={game} onApprove={approve} onReturn={sendBack} onNudge={(r) => toast('Reminder sent', `${r.name} got a friendly nudge and a 5-minute quest.`, 'blue')} />;
   else
     view = (
       <Home
@@ -164,22 +183,20 @@ export default function App() {
 
   return (
     <>
-      <div className="backdrop" aria-hidden="true" />
-      <Sidebar tab={tab} onTab={goTo} pendingCount={game.pending.length} onReset={reset} />
-      <div className="relative z-10 px-3 pt-2 pb-24 sm:px-5 md:ml-64 md:pb-10 md:pl-4 lg:pr-6">
-        <div className="mx-auto max-w-[1280px]">
-          <PageHeader rep={rep} onRep={setRepId} onReset={reset} tab={tab} />
-          <main className="mt-4 min-w-0" key={`${tab}-${repId}`}>
-            {view}
-            <footer className="mt-8 text-center text-xs text-faint">
-              LevelUp · a portfolio project by Diogo Santos · {company.name} and all data are fictional
-            </footer>
-          </main>
-        </div>
+      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-surface focus:px-3 focus:py-2">
+        Skip to content
+      </a>
+      <TopNav tab={tab} onTab={goTo} rep={rep} onRep={setRepId} onReset={reset} onHelp={() => setGuide(true)} pendingCount={game.pending.length} />
+      <main id="main" className="mx-auto max-w-[1200px] px-4 pt-6 pb-4 sm:px-6" key={`${tab}-${repId}`}>
+        {view}
+      </main>
+      <div className="pb-20 md:pb-0">
+        <Footer onReset={reset} />
       </div>
       <QuestPlayer quest={activeQuest} onClose={() => setActiveQuest(null)} onFinish={finishQuest} />
       <SkillDetail skillId={openSkill} rep={rep} reps={reps} state={game} onClose={() => setOpenSkill(null)} onStart={startQuest} />
       <LevelUpModal celebration={celebration} onClose={() => setCelebration(null)} />
+      <WelcomeGuide open={guide} onClose={closeGuide} firstName={rep.name.split(' ')[0]} />
       <Toasts toasts={toasts} />
     </>
   );

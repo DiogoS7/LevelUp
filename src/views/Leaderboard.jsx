@@ -16,8 +16,17 @@ export default function Leaderboard({ reps, currentId }) {
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+      <section className="pt-2 pb-2 lg:col-span-12">
+        <span className="inline-block rounded-full bg-brand-soft px-3 py-1 text-[13px] font-semibold text-brand">{company.week} · starts again on Monday</span>
+        <h1 className="mt-4 max-w-3xl text-[34px] leading-[1.08] font-extrabold tracking-tight sm:text-5xl">
+          Who learned the most <span className="text-brand">this week?</span>
+        </h1>
+        <p className="mt-3 max-w-2xl text-[17px] text-muted">
+          Points (XP) come only from learning, never from sales. Everyone starts at zero every Monday, so anyone can win next week.
+        </p>
+      </section>
       <Card className="p-5 lg:col-span-8">
-        <CardHeader title={`Weekly league · ${company.week}`} subtitle="XP earned since Monday">
+        <CardHeader title="This week’s league" subtitle="XP earned since Monday">
           <div className="card-inset flex rounded-full p-1">
             {[
               ['people', 'People'],
@@ -26,7 +35,7 @@ export default function Leaderboard({ reps, currentId }) {
               <button
                 key={id}
                 onClick={() => setMode(id)}
-                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${mode === id ? 'bg-brand text-white' : 'text-muted hover:text-ink'}`}
+                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${mode === id ? 'bg-brand text-on-brand' : 'text-muted hover:text-ink'}`}
               >
                 {label}
               </button>
@@ -43,10 +52,10 @@ export default function Leaderboard({ reps, currentId }) {
                 const heights = ['h-28', 'h-20', 'h-14'];
                 return (
                   <div key={row.rep.id} className="flex flex-col items-center text-center">
-                    {i === 0 && <LuCrown className="mb-1 text-gold" size={20} />}
+                    {i === 0 && <LuCrown className="mb-1 text-amber-ink" size={20} />}
                     <Avatar id={row.rep.id} size={i === 0 ? 56 : 46} />
                     <span className="mt-2 text-sm font-semibold">{row.rep.name.split(' ')[0]}</span>
-                    <span className="text-xs text-gold">{row.rep.weeklyXp} XP</span>
+                    <span className="text-xs text-amber-ink">{row.rep.weeklyXp} XP</span>
                     <div
                       className={`mt-2 grid w-full place-items-center rounded-t-xl text-2xl font-bold text-[#4a2a00] ${heights[i]}`}
                       style={{ background: `linear-gradient(180deg, ${MEDALS[i]}, ${MEDALS[i]}66)` }}
@@ -61,13 +70,13 @@ export default function Leaderboard({ reps, currentId }) {
               {people.slice(3).map(({ rep, rank }) => (
                 <li
                   key={rep.id}
-                  className={`flex items-center gap-3 rounded-xl px-3 py-2.5 ${rep.id === currentId ? 'border border-[#f5a524]/40 bg-[#fff6e5]' : 'card-inset'}`}
+                  className={`flex items-center gap-3 rounded-xl px-3 py-2.5 ${rep.id === currentId ? 'border border-amber/50 bg-amber-soft' : 'card-inset'}`}
                 >
                   <span className="w-6 text-center text-sm font-semibold text-muted">{rank}</span>
                   <Avatar id={rep.id} size={30} />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-medium">
-                      {rep.name} {rep.id === currentId && <span className="text-xs text-gold">(you)</span>}
+                      {rep.name} {rep.id === currentId && <span className="text-xs text-amber-ink">(you)</span>}
                     </span>
                     <span className="block text-[11px] text-muted">
                       {teamById[rep.team].name} · Level {playerLevel(rep.xp).level}
@@ -81,7 +90,7 @@ export default function Leaderboard({ reps, currentId }) {
                   <span className="hidden w-24 sm:block">
                     <Bar value={rep.weeklyXp / top} height={6} />
                   </span>
-                  <span className="w-16 text-right text-sm font-semibold text-gold">{rep.weeklyXp}</span>
+                  <span className="w-16 text-right text-sm font-semibold text-amber-ink">{rep.weeklyXp}</span>
                 </li>
               ))}
             </ol>
@@ -89,21 +98,21 @@ export default function Leaderboard({ reps, currentId }) {
         ) : (
           <ol className="mt-5 space-y-3">
             {teamsRanked.map(({ team, members, average, total, rank }) => (
-              <li key={team.id} className={`rounded-2xl p-4 ${team.id === myTeam ? 'border border-[#f5a524]/40 bg-[#fff6e5]' : 'card-inset'}`}>
+              <li key={team.id} className={`rounded-2xl p-4 ${team.id === myTeam ? 'border border-amber/50 bg-amber-soft' : 'card-inset'}`}>
                 <div className="flex items-center gap-3">
                   <span className="grid size-9 place-items-center rounded-full text-sm font-bold text-[#4a2a00]" style={{ background: MEDALS[rank - 1] }}>
                     {rank}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block font-semibold">
-                      {team.name} {team.id === myTeam && <span className="text-xs text-gold">(your team)</span>}
+                      {team.name} {team.id === myTeam && <span className="text-xs text-amber-ink">(your team)</span>}
                     </span>
                     <span className="block text-xs text-muted">
                       Lead: {team.lead} · {members.length} people · {total.toLocaleString('en')} XP in total
                     </span>
                   </span>
                   <span className="text-right">
-                    <span className="block text-lg font-semibold text-gold">{average}</span>
+                    <span className="block text-lg font-semibold text-amber-ink">{average}</span>
                     <span className="block text-[11px] text-muted">XP per person</span>
                   </span>
                 </div>
@@ -119,10 +128,10 @@ export default function Leaderboard({ reps, currentId }) {
       </Card>
 
       <Card className="p-5 lg:col-span-4 lg:self-start" delay={0.1}>
-        <CardHeader title="How the league stays fair">
+        <CardHeader title="Why it’s fair">
           <LuInfo className="shrink-0 text-brand" size={18} />
         </CardHeader>
-        <ul className="mt-4 space-y-3 text-sm text-ink/85">
+        <ul className="mt-4 space-y-3 text-sm text-ink">
           <li className="card-inset rounded-xl p-3">
             <b className="text-ink">Weekly reset.</b> <span className="text-muted">Everyone starts at zero on Monday, so a new joiner can win next week.</span>
           </li>
@@ -133,7 +142,7 @@ export default function Leaderboard({ reps, currentId }) {
             <b className="text-ink">Learning, not sales.</b> <span className="text-muted">Only learning earns XP. Sales numbers never appear here.</span>
           </li>
           <li className="card-inset rounded-xl p-3">
-            <b className="text-ink">Quality counts.</b> <span className="text-muted">Quizzes pay for correct answers, and role-plays need a coach&apos;s approval.</span>
+            <b className="text-ink">Quality counts.</b> <span className="text-muted">Quizzes pay for correct answers, and practice tasks need a team lead&apos;s yes.</span>
           </li>
         </ul>
       </Card>

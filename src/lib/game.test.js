@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { reps, quests, teamChallenge, initialPending, skillById } from '../data/academy.js';
+import { reps, quests, teamChallenge, initialPending, skillById, adoptionHistory } from '../data/academy.js';
 import {
   skillLevel,
   levelProgress,
@@ -22,6 +22,7 @@ import {
   teamLeague,
   skillInsights,
   launchReadiness,
+  teamFindings,
   adoption,
   challengeProgress,
   toCsv,
@@ -220,7 +221,7 @@ describe('team insights', () => {
   it('flags in-demand skills most people lack as critical', () => {
     const insights = skillInsights(reps);
     const lumeva = insights.find((i) => i.skill.id === 'sci-lumeva');
-    expect(lumeva.status).toBe('Critical');
+    expect(lumeva.status).toBe('Act now');
     expect(insights[0].urgency).toBeGreaterThanOrEqual(insights[insights.length - 1].urgency);
   });
 
@@ -235,6 +236,15 @@ describe('team insights', () => {
     expect(a.avgStreak).toBe(2);
     expect(a.questsThisWeek).toBe(10);
     expect(a.inactive).toHaveLength(1);
+  });
+
+  it('writes plain-language findings for managers', () => {
+    const findings = teamFindings(reps, emptyState(), adoptionHistory);
+    expect(findings).toHaveLength(4);
+    expect(findings[0].title).toBe('Lumeva launch knowledge is the biggest gap');
+    expect(findings[1].title).toContain('ready for the Lumeva launch');
+    expect(findings[3].text).toContain('Pedro');
+    expect(teamFindings([], emptyState())).toEqual([]);
   });
 
   it('counts launch quests towards the team challenge', () => {

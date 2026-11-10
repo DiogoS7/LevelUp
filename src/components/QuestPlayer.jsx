@@ -41,23 +41,23 @@ function Reading({ quest, onFinish }) {
     <div>
       <ul className="space-y-3">
         {quest.body.map((line) => (
-          <li key={line} className="card-inset rounded-xl px-4 py-3 text-sm leading-relaxed text-ink/85">
+          <li key={line} className="card-inset rounded-xl px-4 py-3 text-sm leading-relaxed text-ink">
             {line}
           </li>
         ))}
       </ul>
       <div className="mt-5 flex items-center justify-between gap-3">
         <p className="text-xs text-muted">
-          {needsApproval ? 'Your team lead reviews this before the XP is added.' : `+${quest.points} skill points in ${skillById[quest.skill].name}.`}
+          {needsApproval ? 'Your team lead gives this a quick yes before the XP is added.' : `Makes your ${skillById[quest.skill].name.toLowerCase()} stronger.`}
         </p>
         <Button onClick={() => onFinish(null)}>
           {needsApproval ? (
             <>
-              <LuSend size={15} /> Submit for review
+              <LuSend size={15} /> Send to my team lead
             </>
           ) : (
             <>
-              <LuCheck size={16} /> Mark as done
+              <LuCheck size={16} /> Done, I've read it
             </>
           )}
         </Button>
@@ -80,14 +80,14 @@ function Quiz({ quest, onFinish }) {
     const perfect = score === total;
     return (
       <div className="py-2 text-center">
-        <div className={`mx-auto grid size-20 place-items-center text-2xl font-bold ${passed ? 'hex medal-earned' : 'rounded-full card-inset text-fail'}`}>
+        <div className={`mx-auto grid size-20 place-items-center text-2xl font-bold ${passed ? 'rounded-full medal-earned' : 'rounded-full card-inset text-bad'}`}>
           {score}/{total}
         </div>
         <h3 className="mt-4 text-lg font-semibold">{perfect ? 'Perfect score!' : passed ? 'Quiz passed' : 'Not quite yet'}</h3>
         <p className="mx-auto mt-1 max-w-sm text-sm text-muted">
           {passed
             ? `You earn ${reward.xp} XP${perfect ? ` (including a ${PERFECT_QUIZ_BONUS} XP perfect bonus)` : ''} and ${reward.points} skill points.`
-            : 'You need 2 out of 3 to pass. Have another go. Wrong answers are how you learn.'}
+            : 'You need 2 out of 3 to pass. Have another go: the right answers were shown in green.'}
         </p>
         <div className="mt-5 flex justify-center gap-2">
           {passed ? (
@@ -131,7 +131,7 @@ function Quiz({ quest, onFinish }) {
       </div>
       <div className="mb-4 flex gap-1.5">
         {quest.questions.map((q, i) => (
-          <span key={q.q} className={`h-1.5 flex-1 rounded-full ${i < index ? 'bg-brand' : i === index ? 'bg-brand/40' : 'bg-ink/8'}`} />
+          <span key={q.q} className={`h-1.5 flex-1 rounded-full ${i < index ? 'bg-brand' : i === index ? 'bg-brand/40' : 'bg-surface-2'}`} />
         ))}
       </div>
       <p className="mb-4 text-[15px] font-medium">{question.q}</p>
@@ -140,8 +140,8 @@ function Quiz({ quest, onFinish }) {
           const isAnswer = i === question.answer;
           const isPicked = i === picked;
           let style = 'card-inset hover:border-brand/30 hover:bg-brand-soft';
-          if (answered && isAnswer) style = 'border border-[#15924a]/50 bg-[#15924a]/8';
-          else if (answered && isPicked) style = 'border border-[#dc3d43]/50 bg-[#dc3d43]/8';
+          if (answered && isAnswer) style = 'border border-good/50 bg-good-soft';
+          else if (answered && isPicked) style = 'border border-bad/50 bg-bad-soft';
           else if (answered) style = 'card-inset opacity-60';
           return (
             <button
@@ -154,14 +154,14 @@ function Quiz({ quest, onFinish }) {
               className={`flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-left text-sm transition ${style}`}
             >
               <span>{option}</span>
-              {answered && isAnswer && <LuCheck size={16} className="shrink-0 text-pass" />}
-              {answered && isPicked && !isAnswer && <LuX size={16} className="shrink-0 text-fail" />}
+              {answered && isAnswer && <LuCheck size={16} className="shrink-0 text-good" />}
+              {answered && isPicked && !isAnswer && <LuX size={16} className="shrink-0 text-bad" />}
             </button>
           );
         })}
       </div>
       <div className="mt-5 flex min-h-9 items-center justify-between gap-3">
-        <p className={`text-sm font-medium ${picked === question.answer ? 'text-pass' : 'text-fail'}`}>
+        <p className={`text-sm font-medium ${picked === question.answer ? 'text-good' : 'text-bad'}`}>
           {answered ? (picked === question.answer ? 'Correct!' : 'Not this one. The right answer is in green.') : ''}
         </p>
         {answered && <Button onClick={next}>{index + 1 === total ? 'See result' : 'Next'}</Button>}

@@ -1,11 +1,16 @@
 import { useState } from 'react';
-import { LuUsers, LuFlame, LuListChecks, LuRocket, LuDownload, LuCheck, LuUndo2, LuBellRing } from 'react-icons/lu';
+import { LuUsers, LuFlame, LuListChecks, LuRocket, LuDownload, LuCheck, LuUndo2, LuBellRing, LuCircleCheck, LuTriangleAlert, LuCircleAlert } from 'react-icons/lu';
 import Card, { CardHeader } from '../components/Card.jsx';
-import { Avatar, Chip, Button, Stat, QUEST_ICONS } from '../components/ui.jsx';
+import { Avatar, Chip, Button, Stat, InfoTip, QUEST_ICONS } from '../components/ui.jsx';
 import { skills, teams, teamById, adoptionHistory, questById, skillById, categoryById } from '../data/academy.js';
-import { skillInsights, launchReadiness, adoption, skillLevel, targetFor, skillsMatrixCsv } from '../lib/game.js';
+import { skillInsights, launchReadiness, adoption, skillLevel, targetFor, skillsMatrixCsv, teamFindings, levelName } from '../lib/game.js';
 
-const STATUS_TONE = { Critical: 'critical', Watch: 'demand', Healthy: 'good' };
+const STATUS_TONE = { 'Act now': 'critical', 'Keep an eye on': 'demand', 'On track': 'good' };
+const FINDING = {
+  good: { icon: LuCircleCheck, cls: 'bg-good-soft text-good' },
+  warn: { icon: LuTriangleAlert, cls: 'bg-amber-soft text-amber-ink' },
+  bad: { icon: LuCircleAlert, cls: 'bg-bad-soft text-bad' },
+};
 const pct = (v) => `${Math.round(v * 100)}%`;
 
 /** Demand (x) against share of people below target (y). Top-right is "fix first". */
@@ -19,20 +24,20 @@ function DemandMatrix({ insights }) {
   const seen = {};
   return (
     <svg viewBox={`0 0 ${w} ${h}`} className="w-full" role="img" aria-label="Skills by business demand and share of people below target">
-      <rect x={x(2.5)} y={pad.t} width={x(3.5) - x(2.5)} height={y(0.5) - pad.t} rx="10" fill="rgb(220 61 67 / 0.06)" />
-      <text x={x(3.5) - 8} y={pad.t + 14} textAnchor="end" fontSize="10" fill="#dc3d43" fontWeight="600">
-        FIX FIRST
+      <rect x={x(2.5)} y={pad.t} width={x(3.5) - x(2.5)} height={y(0.5) - pad.t} rx="10" fill="var(--bad-soft)" fillOpacity="0.6" />
+      <text x={x(3.5) - 8} y={pad.t + 14} textAnchor="end" fontSize="11" fill="var(--bad)" fontWeight="700">
+        Train here first
       </text>
       {[0, 0.25, 0.5, 0.75, 1].map((t) => (
         <g key={t}>
-          <line x1={pad.l} x2={w - pad.r} y1={y(t)} y2={y(t)} stroke="rgb(28 26 51 / 0.08)" />
-          <text x={pad.l - 8} y={y(t)} textAnchor="end" dominantBaseline="middle" fontSize="10" fill="rgb(28 26 51 / 0.55)">
+          <line x1={pad.l} x2={w - pad.r} y1={y(t)} y2={y(t)} stroke="var(--line)" />
+          <text x={pad.l - 8} y={y(t)} textAnchor="end" dominantBaseline="middle" fontSize="10" fill="var(--ink-3)">
             {pct(t)}
           </text>
         </g>
       ))}
-      {['Baseline', 'High', 'Critical'].map((label, i) => (
-        <text key={label} x={x(i + 1)} y={h - 12} textAnchor="middle" fontSize="10" fill="rgb(28 26 51 / 0.55)">
+      {['Normal need', 'In demand', 'Needed most'].map((label, i) => (
+        <text key={label} x={x(i + 1)} y={h - 12} textAnchor="middle" fontSize="10" fill="var(--ink-3)">
           {label}
         </text>
       ))}
@@ -70,29 +75,25 @@ function AdoptionChart() {
         return (
           <g key={d.week}>
             <title>{`${d.week}: ${pct(d.activeRate)} active, ${d.quests} quests`}</title>
-            <rect x={bx(i)} y={h - pad.b - bh} width={step * 0.6} height={bh} rx="5" fill="rgb(91 63 214 / 0.18)" />
-            <text x={bx(i) + step * 0.3} y={h - 8} textAnchor="middle" fontSize="10" fill="rgb(28 26 51 / 0.55)">
+            <rect x={bx(i)} y={h - pad.b - bh} width={step * 0.6} height={bh} rx="5" fill="var(--brand)" fillOpacity="0.2" />
+            <text x={bx(i) + step * 0.3} y={h - 8} textAnchor="middle" fontSize="10" fill="var(--ink-3)">
               {d.week}
             </text>
           </g>
         );
       })}
-      <polyline points={line} fill="none" stroke="#f5a524" strokeWidth="2.5" strokeLinejoin="round" />
+      <polyline points={line} fill="none" stroke="var(--amber)" strokeWidth="2.5" strokeLinejoin="round" />
       {adoptionHistory.map((d, i) => (
-        <circle key={d.week} cx={bx(i) + step * 0.3} cy={ly(d.activeRate)} r="3.5" fill="#f5a524" />
+        <circle key={d.week} cx={bx(i) + step * 0.3} cy={ly(d.activeRate)} r="3.5" fill="var(--amber)" />
       ))}
-      <text x={bx(adoptionHistory.length - 1) + step * 0.3} y={ly(adoptionHistory.at(-1).activeRate) - 10} textAnchor="middle" fontSize="11" fontWeight="600" fill="#f5a524">
+      <text x={bx(adoptionHistory.length - 1) + step * 0.3} y={ly(adoptionHistory.at(-1).activeRate) - 10} textAnchor="middle" fontSize="11" fontWeight="700" fill="var(--amber-ink)">
         {pct(adoptionHistory.at(-1).activeRate)}
       </text>
     </svg>
   );
 }
 
-function heatColor(gap) {
-  if (gap === 0) return '#d9f2e3';
-  if (gap === 1) return '#ffe9bf';
-  return '#fbd3d4';
-}
+const heatClass = (gap) => `heat-${Math.min(gap, 2)}`;
 
 export default function Team({ reps, state, onApprove, onReturn, onNudge }) {
   const [teamId, setTeamId] = useState('all');
@@ -113,33 +114,62 @@ export default function Team({ reps, state, onApprove, onReturn, onNudge }) {
     URL.revokeObjectURL(url);
   };
 
+  const findings = teamFindings(group, state, teamId === 'all' ? adoptionHistory : []);
+
   return (
     <div className="grid grid-cols-1 gap-4">
+      <section className="pt-2 pb-2">
+        <span className="inline-block rounded-full bg-brand-soft px-3 py-1 text-[13px] font-semibold text-brand">For team leads and Learning &amp; Development</span>
+        <h1 className="mt-4 max-w-3xl text-[34px] leading-[1.08] font-extrabold tracking-tight sm:text-5xl">
+          What does the team <span className="text-brand">need to learn?</span>
+        </h1>
+        <p className="mt-3 max-w-2xl text-[17px] text-muted">
+          Every quest is linked to a skill, so all that learning adds up to a live picture of the team: where the gaps are, who is ready for the launch and who has stopped learning.
+        </p>
+      </section>
+
       <Card className="flex flex-wrap items-center justify-between gap-3 p-3">
         <div className="flex flex-wrap gap-1.5">
           {[{ id: 'all', name: 'All teams' }, ...teams].map((t) => (
             <button
               key={t.id}
               onClick={() => setTeamId(t.id)}
-              className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${teamId === t.id ? 'bg-brand text-white' : 'text-muted hover:bg-ink/5 hover:text-ink'}`}
+              className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${teamId === t.id ? 'bg-brand text-on-brand' : 'text-muted hover:bg-surface-2 hover:text-ink'}`}
             >
               {t.name}
             </button>
           ))}
         </div>
         <Button variant="secondary" onClick={download} className="py-1.5 text-xs">
-          <LuDownload size={14} /> Export skills matrix (CSV)
+          <LuDownload size={14} /> Download as a spreadsheet (CSV)
         </Button>
       </Card>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <section aria-label="What we found" className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {findings.map((f) => {
+          const { icon: Icon, cls } = FINDING[f.tone];
+          return (
+            <Card key={f.title} className="flex gap-3 p-4">
+              <span className={`grid size-9 shrink-0 place-items-center rounded-xl ${cls}`}>
+                <Icon size={18} />
+              </span>
+              <span>
+                <span className="block font-bold">{f.title}</span>
+                <span className="block text-sm text-muted">{f.text}</span>
+              </span>
+            </Card>
+          );
+        })}
+      </section>
+
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {[
-          { icon: LuUsers, tone: 'text-brand', label: 'Active this week', value: pct(adopt.activeRate), sub: `${adopt.active} of ${adopt.total} people` },
-          { icon: LuFlame, tone: 'text-flame', label: 'Average streak', value: `${adopt.avgStreak.toFixed(1)} days`, sub: 'Days in a row with learning' },
-          { icon: LuListChecks, tone: 'text-gold', label: 'Quests this week', value: adopt.questsThisWeek, sub: 'Lessons, quizzes and challenges' },
-          { icon: LuRocket, tone: ready >= 0.5 ? 'text-pass' : 'text-fail', label: 'Lumeva launch ready', value: pct(ready), sub: 'All launch skills at target' },
+          { icon: LuUsers, tone: 'brand', label: 'Learned this week', value: pct(adopt.activeRate), hint: `${adopt.active} of ${adopt.total} people`, tip: 'People who finished at least one quest in the last 7 days.' },
+          { icon: LuFlame, tone: 'flame', label: 'Average streak', value: `${adopt.avgStreak.toFixed(1)} days`, hint: 'Days in a row with learning', tip: 'How many days in a row people learn, on average. Higher means the habit is sticking.' },
+          { icon: LuListChecks, tone: 'amber', label: 'Quests this week', value: adopt.questsThisWeek, hint: 'Lessons, quizzes and tasks' },
+          { icon: LuRocket, tone: ready >= 0.5 ? 'good' : 'bad', label: 'Ready for the launch', value: pct(ready), hint: 'All 3 launch skills at the needed level', tip: 'Lumeva, a new medicine, launches in early 2027. Ready means launch knowledge, clinical data and objection handling are all at the level the role needs.' },
         ].map((k, i) => (
-          <Card key={k.label} className="p-4" delay={0.04 * i}>
+          <Card key={k.label} className="p-5" delay={0.04 * i}>
             <Stat {...k} />
           </Card>
         ))}
@@ -147,11 +177,11 @@ export default function Team({ reps, state, onApprove, onReturn, onNudge }) {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
         <Card className="p-5 lg:col-span-7">
-          <CardHeader title="Skills in demand vs skills lacking" subtitle="Bubble size = average gap. Top right is where training helps most." />
+          <CardHeader title="Which skills to train first" subtitle="Each bubble is a skill. Higher up = more people are missing it. Further right = the company needs it more. Bigger = a bigger gap." />
           <DemandMatrix insights={insights} />
         </Card>
         <Card className="p-5 lg:col-span-5" delay={0.05}>
-          <CardHeader title="Where to focus training" subtitle="Ranked by demand × average gap" />
+          <CardHeader title="Training priorities" subtitle="The skills where training will help the most" />
           <ol className="mt-3 space-y-1.5">
             {insights.slice(0, 6).map((it, i) => (
               <li key={it.skill.id} className="card-inset flex items-center gap-3 rounded-xl px-3 py-2.5">
@@ -160,7 +190,7 @@ export default function Team({ reps, state, onApprove, onReturn, onNudge }) {
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-medium">{it.skill.name}</span>
                   <span className="block text-[11px] text-muted">
-                    {it.below} of {group.length} below target · avg gap {it.avgGap.toFixed(1)}
+                    {it.below} of {group.length} people below the level they need
                   </span>
                 </span>
                 <Chip tone={STATUS_TONE[it.status]}>{it.status}</Chip>
@@ -171,24 +201,24 @@ export default function Team({ reps, state, onApprove, onReturn, onNudge }) {
       </div>
 
       <Card className="p-5">
-        <CardHeader title="Skills heatmap" subtitle="Current level in each cell. Colour shows the gap to the role target.">
+        <CardHeader title="Everyone’s skills at a glance" subtitle="Each number is a level from 0 to 5. Green means at the level the role needs; amber is 1 short; red is 2 or more short.">
           <div className="hidden items-center gap-3 text-[11px] text-muted sm:flex">
             {[
-              [0, 'At target'],
-              [1, '1 below'],
-              [2, '2+ below'],
+              [0, 'On track'],
+              [1, '1 short'],
+              [2, '2+ short'],
             ].map(([g, label]) => (
               <span key={g} className="flex items-center gap-1.5">
-                <span className="size-3 rounded" style={{ background: heatColor(g) }} /> {label}
+                <span className={`size-3 rounded ${heatClass(g)}`} /> {label}
               </span>
             ))}
           </div>
         </CardHeader>
-        <div className="scroll-card mt-4 overflow-x-auto">
+        <div className="scroll-thin mt-4 overflow-x-auto">
           <table className="w-full border-separate border-spacing-1 text-xs">
             <thead>
               <tr>
-                <th className="sticky left-0 z-10 w-0 bg-white px-2 text-left font-medium text-muted">Rep</th>
+                <th className="sticky left-0 z-10 w-0 bg-surface px-2 text-left font-medium text-muted">Person</th>
                 {skills.map((s) => (
                   <th key={s.id} className="h-28 w-11 min-w-11 align-bottom font-medium text-muted">
                     <span className="mx-auto block w-4 rotate-180 text-left whitespace-nowrap [writing-mode:vertical-rl]">{s.name}</span>
@@ -199,7 +229,7 @@ export default function Team({ reps, state, onApprove, onReturn, onNudge }) {
             <tbody>
               {group.map((rep) => (
                 <tr key={rep.id}>
-                  <td className="sticky left-0 z-10 bg-white pr-2">
+                  <td className="sticky left-0 z-10 bg-surface pr-2">
                     <span className="flex items-center gap-2 whitespace-nowrap">
                       <Avatar id={rep.id} size={22} /> {rep.name}
                     </span>
@@ -212,9 +242,8 @@ export default function Team({ reps, state, onApprove, onReturn, onNudge }) {
                       <td
                         key={s.id}
                         tabIndex={0}
-                        title={`${rep.name} · ${s.name}: level ${level}, target ${target}`}
-                        className="heat-cell h-8 rounded-md text-center font-semibold"
-                        style={{ background: heatColor(gap) }}
+                        title={`${rep.name} · ${s.name}: ${levelName(level)} (level ${level}), needs level ${target}`}
+                        className={`heat-cell h-8 rounded-md text-center font-semibold ${heatClass(gap)}`}
                       >
                         {level}
                       </td>
@@ -229,13 +258,13 @@ export default function Team({ reps, state, onApprove, onReturn, onNudge }) {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
         <Card className="p-5 lg:col-span-5">
-          <CardHeader title="Adoption" subtitle="Last 8 weeks, whole field force">
+          <CardHeader title="Are people using it?" subtitle="Last 8 weeks, whole field force">
             <span className="flex items-center gap-3 text-[11px] text-muted">
               <span className="flex items-center gap-1">
-                <span className="h-0.5 w-3 bg-amber" /> Active
+                <span className="h-0.5 w-3 bg-amber" /> % who learned
               </span>
               <span className="flex items-center gap-1">
-                <span className="size-2.5 rounded-sm bg-brand/25" /> Quests
+                <span className="size-2.5 rounded-sm bg-brand/25" /> Quests done
               </span>
             </span>
           </CardHeader>
@@ -245,7 +274,7 @@ export default function Team({ reps, state, onApprove, onReturn, onNudge }) {
         </Card>
 
         <Card className="p-5 lg:col-span-4" delay={0.05}>
-          <CardHeader title="Waiting for your review" subtitle="Role-plays and field challenges" />
+          <CardHeader title="Waiting for your review" subtitle="Practice tasks need a quick yes from a team lead before the points are added" />
           <div className="mt-3 space-y-2">
             {pending.length === 0 && <p className="text-sm text-muted">Nothing to review. All caught up.</p>}
             {pending.map((p) => {
@@ -277,7 +306,7 @@ export default function Team({ reps, state, onApprove, onReturn, onNudge }) {
         </Card>
 
         <Card className="p-5 lg:col-span-3" delay={0.1}>
-          <CardHeader title="Needs a nudge" subtitle="No learning in 7+ days" />
+          <CardHeader title="Could use a nudge" subtitle="No learning in over a week" />
           <div className="mt-3 space-y-2">
             {adopt.inactive.length === 0 && <p className="text-sm text-muted">Everyone learned this week.</p>}
             {adopt.inactive.map((r) => (
@@ -285,9 +314,9 @@ export default function Team({ reps, state, onApprove, onReturn, onNudge }) {
                 <Avatar id={r.id} size={28} />
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-medium">{r.name}</div>
-                  <div className="text-[11px] text-muted">Last active {r.activeDaysAgo} days ago</div>
+                  <div className="text-[12px] text-muted">Last learned {r.activeDaysAgo} days ago</div>
                 </div>
-                <button onClick={() => onNudge(r)} aria-label={`Nudge ${r.name}`} className="grid size-8 place-items-center rounded-full text-gold hover:bg-ink/5">
+                <button onClick={() => onNudge(r)} aria-label={`Nudge ${r.name}`} className="grid size-8 place-items-center rounded-full text-amber-ink hover:bg-surface-2">
                   <LuBellRing size={15} />
                 </button>
               </div>

@@ -1,99 +1,115 @@
-![LevelUp banner](assets/banner.png)
+[![LevelUp: learn the skills that matter, a few minutes at a time](assets/social-preview.png)](https://diogos7.github.io/LevelUp/)
 
 # LevelUp
 
 [![CI](https://github.com/DiogoS7/LevelUp/actions/workflows/ci.yml/badge.svg)](https://github.com/DiogoS7/LevelUp/actions/workflows/ci.yml)
 
-*Gamified skills for field sales teams.*
+**Learn the skills that matter, a few minutes at a time.** Try it live: **[diogos7.github.io/LevelUp](https://diogos7.github.io/LevelUp/)**
 
-LevelUp is a skills platform for pharmaceutical field sales reps that people actually want to open. Each rep sees which of their skills are below target and which skills the business needs most right now. They close those gaps through short quests and earn XP, levels, streaks and badges along the way. Team leads and Learning & Development get a live view of where the team is lacking skills, how ready it is for the next launch, and whether people are really using the tool.
+LevelUp is a learning app for a sales team that feels like a game. It follows the field sales team of Solenne Biosciences, a made-up pharmaceutical company in Portugal, as they get ready to launch a new (also made-up) medicine called Lumeva. It answers three questions in plain words:
 
-The data is fictional: a field force for the made-up **Solenne Biosciences** in Portugal, preparing for the launch of a made-up medicine called **Lumeva**. Every person, product and number is synthetic.
-
-**Live demo:** https://diogos7.github.io/LevelUp/
+1. **What should I learn next?** Every skill has a level from 0 to 5, and each role needs a certain level. LevelUp shows each person where they fall short, starting with the skills the company needs most right now.
+2. **How do I learn it without losing a day?** Through quests: a 5-minute lesson, a 3-question quiz or a short practice task. Each one earns points (XP), keeps a daily streak going and can unlock badges.
+3. **What does the whole team need?** Managers see which skills the team is missing, who is ready for the launch, who has stopped learning, and which practice tasks are waiting for their review.
 
 ## The problem it solves
 
-Learning platforms for field teams often have two problems:
+Learning tools for sales teams usually have two problems:
 
-1. **Nobody uses them.** A catalogue of long courses competes with a full diary of customer visits, and it loses.
-2. **Nobody can see the gaps.** Managers don't know which skills the team lacks, which of those matter most for the business, or whether training is working.
+- **Nobody uses them.** Long courses compete with a full diary of customer visits, and they lose.
+- **Nobody can see the gaps.** Managers can't tell which skills the team lacks, which of those matter most, or whether training is working.
 
-LevelUp tackles both. Gamification drives adoption: quests take 3 to 15 minutes, progress is visible, the week's league resets every Monday, and the whole field force works towards a shared team goal. Every quest is linked to a skill, every skill has a target per role and a business demand level, so all that activity turns into a live skills picture for the people who plan training.
+LevelUp tackles both. Quests are short, progress is visible straight away and the weekly leaderboard resets every Monday, so people keep coming back. Every quest is linked to a skill, so all that learning adds up to a live picture of the team for the people who plan training.
 
-## Views
+![Home: one clear next step, then level, streak, rank and launch readiness](assets/screenshots/home.webp)
 
-![My journey: level, XP, streak, coach suggestion, gaps, quests and badges](assets/screenshots/journey.webp)
+## What a manager sees
 
-![My skills: radar against role targets, every skill with its level and demand](assets/screenshots/skills.webp)
+The **For managers** page opens with the headlines in plain words, worked out from the data:
 
-![Quests: the quest board, ranked by what helps you most](assets/screenshots/quests.webp)
+- **Lumeva launch knowledge is the biggest gap:** 10 of 12 people are below the level their role needs.
+- **Only 2 of 12 are ready for the launch**, meaning at the needed level in launch knowledge, clinical data and objection handling.
+- **92% learned something this week**, up from 42% eight weeks ago.
+- **1 person needs a nudge:** Pedro hasn't learned anything in over a week.
 
-![Leaderboard: weekly league for people and teams](assets/screenshots/leaderboard.webp)
+Below that: which skills to train first (how many people lack each skill against how much the company needs it), a ranked list of training priorities, everyone's skills at a glance with a spreadsheet download, an 8-week adoption chart, practice tasks to approve, and a list of people to nudge.
 
-![Team insights: adoption, launch readiness and where to focus training](assets/screenshots/team-insights.webp)
+![For managers: headlines, numbers and which skills to train first](assets/screenshots/managers.webp)
 
-![Skills heatmap: every rep and every skill against target](assets/screenshots/heatmap.webp)
+## Making it a game, fairly
 
-![Mobile: built for reps on the road](assets/screenshots/mobile.webp)
+| Game element | How it works |
+| --- | --- |
+| **XP and levels** | Every quest earns XP. Collect enough and you move up a level, from Rookie to Master. |
+| **Streaks** | Learn something every day to keep your streak going. |
+| **Badges** | Eight badges, like *Launch ready*, *Quiz ace* and *AI pioneer*. Tap any badge to see how to earn it. |
+| **Weekly leaderboard** | Everyone starts at zero on Monday, so anyone can win next week. Teams are ranked on points per person, so a small team can beat a big one. |
+| **Team goal** | The whole field force works towards 80 Lumeva quests before the end of November. |
 
-### Highlights
+Points come only from learning, never from sales figures. Quizzes pay for correct answers, and practice tasks need a quick yes from a team lead before the points are added, so the game rewards real learning rather than clicking.
 
-| | |
-|---|---|
-| ![A playable quiz](assets/screenshots/highlight-quiz.webp) | ![Skill detail with why it matters now](assets/screenshots/highlight-skill.webp) |
-| ![Skills in demand vs skills lacking](assets/screenshots/highlight-matrix.webp) | ![Team lead review of role-plays](assets/screenshots/highlight-review.webp) |
+## Screenshots
 
-## What it does
+| My skills | Learn |
+| --- | --- |
+| ![My skills](assets/screenshots/skills.webp) | ![Learn](assets/screenshots/learn.webp) |
 
-### For reps
+| A quiz | One skill up close |
+| --- | --- |
+| ![A quiz](assets/screenshots/quiz.webp) | ![One skill up close](assets/screenshots/skill.webp) |
 
-- **Skill profile.** 11 skills in 5 areas (Product & Science, Customer Engagement, Business Acumen, Compliance, Digital & AI), each with a level from 0 *Not started* to 5 *Expert* and a target for the rep's role. Field Sales Reps and Key Account Managers have different targets.
-- **Why it matters now.** Skills carry a business demand level (baseline, high or critical) and a plain-language reason, for example *"Lumeva launches in Q1 2027"*. Compliance is marked as mandatory.
-- **Coach suggestion.** The next best quest is picked from the rep's gaps, weighted by demand, and comes with a reason: *"Closes a gap in a critical skill: Lumeva launch knowledge (level 0 → target 3)."*
-- **Quests.** Five types: micro-lessons, quizzes, role-plays, field challenges and peer coaching. Quizzes are playable, pay XP for correct answers, need 2 of 3 to pass and give a bonus for a perfect score. Role-plays and field challenges go to the team lead for review before the XP is awarded.
-- **XP, levels and streaks.** Player levels with titles (Rookie, Explorer, Specialist, Expert, Master), a daily learning streak, and skill points that raise skill levels. Level-ups get a celebration.
-- **Badges.** Eight badges, such as *Launch ready*, *AI pioneer*, *Quiz ace* and *Team player*. Locked badges show how to earn them.
-- **Team challenge.** A shared goal (80 Lumeva quests before 30 November) that every launch quest counts towards.
+| Leaderboard | Welcome guide |
+| --- | --- |
+| ![Leaderboard](assets/screenshots/leaderboard.webp) | ![Welcome guide](assets/screenshots/welcome.webp) |
 
-### For team leads and L&D
+| Which skills to train first | Everyone's skills at a glance |
+| --- | --- |
+| ![Which skills to train first](assets/screenshots/train-first.webp) | ![Everyone's skills at a glance](assets/screenshots/heatmap.webp) |
 
-- **Adoption KPIs.** People active this week, average streak, quests completed this week and an 8-week trend.
-- **Skills in demand vs skills lacking.** A matrix of business demand against the share of people below target. The top-right corner is where training helps most.
-- **Where to focus training.** Skills ranked by demand × average gap and labelled *Critical*, *Watch* or *Healthy*.
-- **Launch readiness.** The share of reps at target in every launch skill.
-- **Skills heatmap.** Every rep against every skill, coloured by the gap to target. Filter by team and export it to CSV.
-- **Reviews and nudges.** Approve or send back role-plays and field challenges, and nudge anyone who hasn't learned in 7 days.
-
-### Gamification that stays fair
-
-- The league resets every Monday, so a new joiner can win next week.
-- Teams are ranked on XP per person, so a small team can beat a big one.
-- Only learning earns XP. Sales figures never appear in the game.
-- Quality counts: quizzes pay for correct answers, and role-plays need a coach's approval.
+| Dark theme | Phone |
+| --- | --- |
+| ![Dark theme](assets/screenshots/dark.webp) | <img src="assets/screenshots/phone.webp" alt="Phone" width="300"> |
 
 ## Try the demo
 
-- Use the menu in the top-right corner to **play as any of the 12 reps**.
-- Start the coach's suggested quest on *My journey*, answer the quiz and claim the XP. Your skills, badges, league position and the team challenge all update.
-- Open **Team insights** to approve a pending role-play, then switch to that rep to see their XP.
-- Progress is saved in your browser only. **Reset demo progress** in the same menu starts again.
+- A short guide opens on your first visit. You can reopen it any time with **How it works**.
+- Press **Start now** on the home page, answer the quiz and claim your XP. Your skills, badges, rank and the team goal all update.
+- Use the menu in the top-right corner to **see the app as any of the 12 people**.
+- Open **For managers** to approve a practice task, then switch to that person to see their points.
+- Switch between light and dark with the moon/sun button. By default the app follows your device.
+- Progress is saved in your browser only. **Start again** in the footer clears it.
 
-## Tech stack
+## For the technical reader
 
 | | |
-|---|---|
-| UI | React 19, Tailwind CSS v4 (custom `card` utility), Framer Motion |
-| Type | [Outfit](https://fonts.google.com/specimen/Outfit), self-hosted (SIL Open Font License) |
+| --- | --- |
+| UI | React 19, Tailwind CSS v4 with light and dark colour tokens, Framer Motion |
 | Icons | Lucide, via `react-icons/lu` |
-| Charts | Hand-written SVG (radar, demand matrix, adoption trend), no chart library |
+| Charts | Hand-written SVG (skill radar, train-first chart, adoption trend), no chart library |
 | Build | Vite 7 |
-| Tests | Vitest unit tests for every game rule (`src/lib/game.test.js`) |
-| CI/CD | GitHub Actions runs the tests and the build on every push and PR, then deploys `main` to GitHub Pages |
+| Tests | Vitest unit tests for every game rule and manager headline (`src/lib/game.test.js`) |
+| CI/CD | GitHub Actions runs the tests and the build on every push and pull request, then publishes `main` to GitHub Pages |
 
-The look is light and warm on purpose, closer to a consumer learning app than a business dashboard: white cards on a paper background with a faint dot grid, a violet brand colour, amber for XP and rewards, and hexagon badges that echo the logo.
+Every rule lives in `src/lib/game.js` as a pure function (data in, data out): skill levels and gaps, the quest suggestions, XP and levels, badges, the leaderboards, the manager headlines and the CSV export. That keeps the rules testable without rendering anything. Connecting a real source, such as a learning platform, a CRM or an HR system, only means replacing `src/data/academy.js`.
 
-## Getting started
+```
+src/
+├── App.jsx                # Game state, saving progress, notifications, level-up celebration
+├── components/
+│   ├── Chrome.jsx         # Top menu, phone tab bar, welcome guide, theme toggle, footer
+│   ├── QuestPlayer.jsx    # Lessons, playable quizzes and practice tasks
+│   ├── QuestCard.jsx
+│   ├── SkillDetail.jsx
+│   ├── Card.jsx
+│   └── ui.jsx             # Logo, avatar, bars, level blocks, chips, tips, modal, buttons
+├── views/                 # Home, Skills, Learn, Leaderboard, For managers
+├── data/academy.js        # Made-up skills, role levels, demand, people and quests
+└── lib/
+    ├── game.js            # All the rules
+    └── game.test.js
+```
+
+## Run it yourself
 
 You need Node.js 20 or later.
 
@@ -107,33 +123,11 @@ npm run dev
 Then open http://localhost:5173.
 
 | Command | What it does |
-|---|---|
-| `npm run dev` | Start the dev server with hot reload |
+| --- | --- |
+| `npm run dev` | Start the app with live reload |
 | `npm test` | Run the unit tests once |
-| `npm run test:watch` | Re-run tests on save |
-| `npm run build` | Production build into `dist/` |
-| `npm run preview` | Serve the production build locally |
-
-## Project structure
-
-```
-src/
-├── App.jsx                # Game state, persistence, toasts and level-up celebrations
-├── components/
-│   ├── Card.jsx
-│   ├── Chrome.jsx         # Sidebar, bottom tabs, page header, rep switcher, toasts, level-up modal
-│   ├── QuestPlayer.jsx    # Lessons, playable quizzes and review submissions
-│   ├── QuestCard.jsx
-│   ├── SkillDetail.jsx
-│   └── ui.jsx             # Logo, avatar, bars, level pips, chips, modal, buttons
-├── views/                 # Home, Skills, Quests, Leaderboard, Team
-├── data/academy.js        # Synthetic skills, targets, demand, reps and quests
-└── lib/
-    ├── game.js            # Levels, gaps, recommendations, badges, leagues, insights, CSV
-    └── game.test.js
-```
-
-Every rule lives in `lib/game.js` as a pure function, so it is tested without rendering anything. Connecting a real source, such as an LMS, a CRM or an HR system, only means replacing `data/academy.js`.
+| `npm run build` | Build the site into `dist/` |
+| `npm run preview` | Serve the built site locally |
 
 ## Why I built it
 

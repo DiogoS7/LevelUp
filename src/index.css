@@ -1,95 +1,148 @@
 @import "tailwindcss";
 
-/* Outfit (SIL Open Font License, see src/assets/fonts/OFL.txt), self-hosted so the app has no font CDN dependency. */
-@font-face {
-  font-family: "Outfit";
-  src: url("./assets/fonts/Outfit.woff") format("woff");
-  font-weight: 100 900;
-  font-display: swap;
+/* Light and dark colour tokens. The theme follows the device unless the visitor picks one with the toggle. */
+:root {
+  color-scheme: light;
+  --bg: #f5f6fa;
+  --surface: #ffffff;
+  --surface-2: #f1f0f8;
+  --line: #e4e3ee;
+  --ink: #17152e;
+  --ink-2: #4c4a63;
+  --ink-3: #7c7a90;
+  --brand: #6d4ae6;
+  --brand-strong: #5534cf;
+  --brand-soft: #efeafe;
+  --on-brand: #ffffff;
+  --amber: #f5a524;
+  --amber-ink: #8a5300;
+  --amber-soft: #fff4dc;
+  --flame: #e8591f;
+  --flame-soft: #ffece3;
+  --good: #11804a;
+  --good-soft: #dff4e8;
+  --bad: #c9353b;
+  --bad-soft: #fde4e4;
+  --teal: #0e8f8f;
+  --shadow: 0 1px 2px rgb(23 21 46 / 0.04), 0 8px 24px rgb(23 21 46 / 0.06);
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --bg: #121219;
+    --surface: #1b1b25;
+    --surface-2: #24242f;
+    --line: #30303d;
+    --ink: #eeedf6;
+    --ink-2: #bdbbcc;
+    --ink-3: #8d8b9e;
+    --brand: #9b84ff;
+    --brand-strong: #b2a0ff;
+    --brand-soft: #2a2546;
+    --on-brand: #15132a;
+    --amber: #f7b543;
+    --amber-ink: #f7c46a;
+    --amber-soft: #3a2f17;
+    --flame: #ff8a5c;
+    --flame-soft: #3b231a;
+    --good: #4fc98a;
+    --good-soft: #17332a;
+    --bad: #f07378;
+    --bad-soft: #3c1e22;
+    --teal: #3cc6c0;
+    --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #121219;
+  --surface: #1b1b25;
+  --surface-2: #24242f;
+  --line: #30303d;
+  --ink: #eeedf6;
+  --ink-2: #bdbbcc;
+  --ink-3: #8d8b9e;
+  --brand: #9b84ff;
+  --brand-strong: #b2a0ff;
+  --brand-soft: #2a2546;
+  --on-brand: #15132a;
+  --amber: #f7b543;
+  --amber-ink: #f7c46a;
+  --amber-soft: #3a2f17;
+  --flame: #ff8a5c;
+  --flame-soft: #3b231a;
+  --good: #4fc98a;
+  --good-soft: #17332a;
+  --bad: #f07378;
+  --bad-soft: #3c1e22;
+  --teal: #3cc6c0;
+  --shadow: none;
 }
 
-@theme {
-  --font-sans: "Outfit", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --color-ink: #1c1a33;
-  --color-muted: rgb(28 26 51 / 0.62);
-  --color-faint: rgb(28 26 51 / 0.42);
-  --color-paper: #f7f4ee;
-  --color-brand: #5b3fd6;
-  --color-brand-soft: #efeafe;
-  --color-pass: #15924a;
-  --color-fail: #dc3d43;
-  --color-gold: #b86e00;
-  --color-amber: #f5a524;
-  --color-flame: #f0642e;
-  --color-teal: #0e9a9a;
+@theme inline {
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-muted: var(--ink-2);
+  --color-faint: var(--ink-3);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-soft: var(--brand-soft);
+  --color-on-brand: var(--on-brand);
+  --color-amber: var(--amber);
+  --color-amber-ink: var(--amber-ink);
+  --color-amber-soft: var(--amber-soft);
+  --color-flame: var(--flame);
+  --color-flame-soft: var(--flame-soft);
+  --color-good: var(--good);
+  --color-good-soft: var(--good-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+  --color-teal: var(--teal);
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
   html,
   body,
   #root {
     min-height: 100%;
   }
   body {
-    @apply bg-paper font-sans text-ink antialiased;
+    @apply bg-bg font-sans text-ink antialiased;
+    font-size: 15px;
+    line-height: 1.55;
     overflow-x: hidden;
   }
   button {
     cursor: pointer;
   }
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
 }
 
-/* Solid white card with a soft violet-tinted shadow. */
+/* Plain card: surface colour, thin line, soft shadow in light mode. */
 @utility card {
   position: relative;
-  background: #fff;
-  border: 1px solid rgb(28 26 51 / 0.07);
-  box-shadow:
-    0 1px 2px rgb(28 26 51 / 0.04),
-    0 12px 28px -16px rgb(60 40 140 / 0.22);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
 }
 
 /* Tinted surface inside a card. */
 @utility card-inset {
-  background: #f6f4fb;
-  border: 1px solid rgb(28 26 51 / 0.06);
+  background: var(--surface-2);
+  border: 1px solid transparent;
 }
 
-/* ---------- Background: warm paper with a dot grid and two soft colour washes ---------- */
-.backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
-  background-image: radial-gradient(rgb(28 26 51 / 0.07) 1px, transparent 1px);
-  background-size: 22px 22px;
-}
-.backdrop::before,
-.backdrop::after {
-  content: '';
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(110px);
-}
-.backdrop::before {
-  width: 620px;
-  height: 520px;
-  left: -180px;
-  top: -220px;
-  background: #b9a8ff;
-  opacity: 0.45;
-}
-.backdrop::after {
-  width: 560px;
-  height: 460px;
-  right: -160px;
-  bottom: -220px;
-  background: #ffd38a;
-  opacity: 0.45;
-}
-
-/* XP bar: warm amber fill with a slow moving shine. */
+/* XP bar: amber fill with a slow moving shine. */
 .xp-fill {
   background: linear-gradient(90deg, #f08a24, #f5a524 55%, #ffc94d);
   position: relative;
@@ -100,7 +153,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(100deg, transparent 20%, rgb(255 255 255 / 0.55) 50%, transparent 80%);
+  background: linear-gradient(100deg, transparent 20%, rgb(255 255 255 / 0.5) 50%, transparent 80%);
   transform: translateX(-100%);
   animation: shine 3.2s ease-in-out infinite;
 }
@@ -146,23 +199,27 @@
   }
 }
 
-/* Badges: hexagon medals. */
-.hex {
-  clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
-}
+/* Badges are round medals, like the logo. */
 .medal-earned {
-  background: linear-gradient(160deg, #ffd166, #f5a524 55%, #e07a10);
+  background: radial-gradient(circle at 35% 30%, #ffe08a, #f5a524 55%, #d9800d);
   color: #4a2a00;
+  box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px #f5a52466;
 }
 .medal-locked {
-  background: #ece9f3;
-  color: rgb(28 26 51 / 0.35);
+  background: var(--surface-2);
+  color: var(--ink-3);
+  border: 1.5px dashed var(--line);
 }
 
-/* Heatmap cell focus ring. */
-.heat-cell:focus-visible {
-  outline: 2px solid var(--color-brand);
-  outline-offset: 1px;
+/* Heatmap colours (gap to target) for both themes. */
+.heat-0 {
+  background: var(--good-soft);
+}
+.heat-1 {
+  background: var(--amber-soft);
+}
+.heat-2 {
+  background: var(--bad-soft);
 }
 
 .scroll-thin::-webkit-scrollbar {
@@ -170,11 +227,14 @@
   width: 6px;
 }
 .scroll-thin::-webkit-scrollbar-thumb {
-  background: rgb(28 26 51 / 0.18);
+  background: var(--line);
   border-radius: 99px;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
   *,
   *::before,
   *::after {

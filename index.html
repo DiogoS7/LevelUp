@@ -4,8 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="LevelUp – a gamified skills platform for field sales teams: skill gaps, in-demand skills, quests, XP, badges and team insights." />
-    <meta name="theme-color" content="#f7f4ee" />
+    <meta name="theme-color" content="#f5f6fa" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#121219" media="(prefers-color-scheme: dark)" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <script>
+      // Apply a saved light/dark choice before the first paint, so the page doesn't flash.
+      try { var t = localStorage.getItem('levelup-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+    </script>
     <title>LevelUp · Gamified Skills for Field Teams</title>
   </head>
   <body>
