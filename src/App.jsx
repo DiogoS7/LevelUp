@@ -8,7 +8,7 @@ import Quests from './views/Quests.jsx';
 import Leaderboard from './views/Leaderboard.jsx';
 import Team from './views/Team.jsx';
 import Studio from './views/Studio.jsx';
-import { createCourse, addCourse } from './lib/courses.js';
+import { createCourse, addCourse, updateCourse, decide, approveCourse, sendBackCourse } from './lib/courses.js';
 import { reps as baseReps, DEFAULT_REP, initialPending, company, questById, skillById, skills, personById, isStaff } from './data/academy.js';
 import {
   emptyState,
@@ -170,6 +170,8 @@ export default function App() {
     toast('Started again', 'All demo progress in this browser was cleared.', 'blue');
   };
 
+  const changeCourse = (id, fn) => setGame((g) => updateCourse(g, id, fn(g.courses.find((c) => c.id === id))));
+
   /** Save a freshly drafted course and return its id. */
   const createDraft = (request, draft) => {
     const course = createCourse(game.courses, { ...request, draft, by: viewer.name, date: today() });
@@ -187,7 +189,22 @@ export default function App() {
   if (tab === 'skills') view = <Skills rep={rep} onOpenSkill={setOpenSkill} />;
   else if (tab === 'quests') view = <Quests rep={rep} state={game} onStart={startQuest} />;
   else if (tab === 'league') view = <Leaderboard reps={reps} currentId={repId} />;
-  else if (tab === 'studio') view = <Studio viewer={viewer} state={game} onCreate={createDraft} />;
+  else if (tab === 'studio') view = (
+      <Studio
+        viewer={viewer}
+        state={game}
+        onCreate={createDraft}
+        onDecide={(id, key, d) => changeCourse(id, (c) => decide(c, key, d))}
+        onApprove={(id) => {
+          changeCourse(id, (c) => approveCourse(c, viewer.name, today()));
+          toast('Course approved', 'Recorded with your name and today’s date.', 'gold');
+        }}
+        onSendBack={(id, note) => {
+          changeCourse(id, (c) => sendBackCourse(c, note, viewer.name));
+          toast('Kept as a draft', 'Your note is saved with the course.', 'blue');
+        }}
+      />
+    );
   else if (tab === 'team')
     view = <Team reps={reps} state={game} onApprove={approve} onReturn={sendBack} onNudge={(r) => toast('Reminder sent', `${r.name} got a friendly nudge and a 5-minute quest.`, 'blue')} />;
   else

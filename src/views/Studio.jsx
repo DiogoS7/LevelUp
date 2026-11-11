@@ -5,7 +5,7 @@ import { Button, Chip } from '../components/ui.jsx';
 import { skillById } from '../data/academy.js';
 import SourceStep from '../components/studio/SourceStep.jsx';
 import DraftStep from '../components/studio/DraftStep.jsx';
-import { draftItems } from '../lib/draft.js';
+import ReviewStep from '../components/studio/ReviewStep.jsx';
 
 const STEPS = [
   { icon: LuFileText, title: 'Pick a source', text: 'Start from approved company material, like a product leaflet or a field guide.' },
@@ -73,25 +73,7 @@ function Frame({ step, title, onBack, children }) {
   );
 }
 
-/** Read-only look at a drafted course (the review screen replaces this in US-04). */
-function CoursePreview({ course }) {
-  return (
-    <Card className="p-5 sm:p-6">
-      <p className="text-sm text-muted">Saved as a draft. Nothing is visible to reps until it is reviewed and approved.</p>
-      <ul className="mt-4 space-y-2">
-        {draftItems(course.draft).map((it) => (
-          <li key={it.key} className="card-inset rounded-xl px-4 py-2.5 text-sm">
-            <span className="text-[12px] font-semibold text-faint">{it.label}</span>
-            <span className="block">{it.text}</span>
-            <span className="text-[12px] text-faint">{it.sources.length ? `From sentence ${it.sources.join(', ')}` : 'No source given'}</span>
-          </li>
-        ))}
-      </ul>
-    </Card>
-  );
-}
-
-export default function Studio({ viewer, state, onCreate }) {
+export default function Studio({ viewer, state, onCreate, onDecide, onApprove, onSendBack }) {
   const [mode, setMode] = useState({ name: 'list' });
   const courses = state.courses ?? [];
   const toList = () => setMode({ name: 'list' });
@@ -115,7 +97,13 @@ export default function Studio({ viewer, state, onCreate }) {
   if (open) {
     return (
       <Frame step={3} title={open.title} onBack={toList}>
-        <CoursePreview course={open} />
+        <ReviewStep
+          course={open}
+          viewer={viewer}
+          onDecide={(key, d) => onDecide(open.id, key, d)}
+          onApprove={() => onApprove(open.id)}
+          onSendBack={(note) => onSendBack(open.id, note)}
+        />
       </Frame>
     );
   }

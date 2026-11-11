@@ -291,7 +291,7 @@ export function WelcomeGuide({ open, onClose, viewer, staffView }) {
 /** Stack of short-lived notifications. */
 export function Toasts({ toasts }) {
   return (
-    <div aria-live="polite" className="pointer-events-none fixed right-3 bottom-20 z-[60] flex w-[min(340px,calc(100vw-24px))] flex-col gap-2 md:top-20 md:bottom-auto">
+    <div aria-live="polite" className="pointer-events-none fixed right-3 bottom-20 z-[60] flex w-[min(340px,calc(100vw-24px))] flex-col gap-2 md:right-5 md:bottom-5">
       <AnimatePresence>
         {toasts.map((t) => (
           <motion.div
