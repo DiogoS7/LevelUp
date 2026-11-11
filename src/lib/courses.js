@@ -52,7 +52,7 @@ export function reviewSummary(course) {
   const sentences = sourceSentences(course.source);
   const items = draftItems(course.draft).map((it) => {
     const check = sourceCheck(it, sentences);
-    return { ...it, inSource: check.ok, problem: check.ok ? null : check.reason, decision: course.review?.[it.key] ?? null };
+    return { ...it, inSource: check.ok, problem: check.ok ? null : check.reason, decision: course.review?.[it.key] ?? null, edited: Boolean(course.edited?.[it.key]) };
   });
   const decided = items.filter((i) => i.decision).length;
   const kept = (kind) => items.filter((i) => i.kind === kind && i.decision === 'ok').length;
@@ -121,4 +121,50 @@ export function courseQuests(courses = []) {
       });
   }
   return out;
+}
+
+/* -------------------------------------------------------------------- edits */
+
+const clean = (t) => String(t ?? '').replace(/\s+/g, ' ').trim();
+
+/**
+ * Edit the wording of one part of a draft. The part keeps its source sentences and is marked Edited; its
+ * OK/Remove decision is cleared so the reviewer confirms the new wording. Invalid edits are ignored.
+ * patch: lesson { text } · quiz { q, options, answer } · practice { title, text }.
+ */
+export function editItem(course, key, patch) {
+  if (course.status === 'approved') return course;
+  const draft = structuredClone(course.draft);
+  const [kind, n] = key.split('-');
+  const i = Number(n);
+  if (kind === 'lesson') {
+    const point = draft.lesson.points[i];
+    const text = clean(patch.text);
+    if (!point || !text) return course;
+    if (text === point.text) return course;
+    point.text = text;
+  } else if (kind === 'quiz') {
+    const q = draft.quiz[i];
+    if (!q) return course;
+    const next = {
+      q: patch.q === undefined ? q.q : clean(patch.q),
+      options: patch.options === undefined ? q.options : patch.options.map(clean),
+      answer: patch.answer === undefined ? q.answer : patch.answer,
+    };
+    if (!next.q || next.options.length !== q.options.length || next.options.some((o) => !o)) return course;
+    if (new Set(next.options.map((o) => o.toLowerCase())).size !== next.options.length) return course;
+    if (!Number.isInteger(next.answer) || next.answer < 0 || next.answer >= next.options.length) return course;
+    if (next.q === q.q && next.answer === q.answer && next.options.every((o, k) => o === q.options[k])) return course;
+    Object.assign(q, next);
+  } else if (kind === 'practice') {
+    const p = draft.practice;
+    const title = patch.title === undefined ? p.title : clean(patch.title);
+    const text = patch.text === undefined ? p.text : clean(patch.text);
+    if (!title || !text || (title === p.title && text === p.text)) return course;
+    Object.assign(p, { title, text });
+  } else return course;
+
+  const review = { ...course.review };
+  delete review[key];
+  return { ...course, draft, review, edited: { ...(course.edited ?? {}), [key]: true } };
 }

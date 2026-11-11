@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LuCheck, LuX, LuTriangleAlert, LuCircleCheck, LuUndo2, LuBookOpen, LuCircleHelp, LuMic, LuShieldCheck } from 'react-icons/lu';
+import { LuCheck, LuX, LuTriangleAlert, LuCircleCheck, LuUndo2, LuBookOpen, LuCircleHelp, LuMic, LuShieldCheck, LuPencil } from 'react-icons/lu';
 import Card from '../Card.jsx';
 import { Button, Chip } from '../ui.jsx';
 import DocumentPanel from './DocumentPanel.jsx';
@@ -8,21 +8,77 @@ import { skillById } from '../../data/academy.js';
 
 const KIND_ICON = { lesson: LuBookOpen, quiz: LuCircleHelp, practice: LuMic };
 
-function Item({ item, sentences, selected, onSelect, onDecide, locked }) {
+const field = 'w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm';
+
+/** Inline editor for one part. Saves only valid wording; the source sentences stay linked. */
+function Editor({ item, onSave, onCancel }) {
+  const [text, setText] = useState(item.kind === 'quiz' ? item.question.q : item.text);
+  const [detail, setDetail] = useState(item.detail ?? '');
+  const [options, setOptions] = useState(item.kind === 'quiz' ? [...item.question.options] : []);
+  const [answer, setAnswer] = useState(item.kind === 'quiz' ? item.question.answer : 0);
+  const trimmed = options.map((o) => o.trim().toLowerCase());
+  const valid =
+    text.trim() &&
+    (item.kind !== 'practice' || detail.trim()) &&
+    (item.kind !== 'quiz' || (options.every((o) => o.trim()) && new Set(trimmed).size === options.length));
+  const save = () => {
+    if (item.kind === 'lesson') onSave({ text });
+    else if (item.kind === 'practice') onSave({ title: text, text: detail });
+    else onSave({ q: text, options, answer });
+  };
+  return (
+    <div className="mt-2 space-y-2" onClick={(e) => e.stopPropagation()}>
+      <label className="block text-[12px] font-semibold text-faint">
+        {item.kind === 'quiz' ? 'Question' : item.kind === 'practice' ? 'Title' : 'Lesson point'}
+        <textarea value={text} onChange={(e) => setText(e.target.value)} rows={item.kind === 'lesson' ? 3 : 2} className={`mt-1 ${field} font-normal text-ink`} />
+      </label>
+      {item.kind === 'practice' && (
+        <label className="block text-[12px] font-semibold text-faint">
+          What to do
+          <textarea value={detail} onChange={(e) => setDetail(e.target.value)} rows={3} className={`mt-1 ${field} font-normal text-ink`} />
+        </label>
+      )}
+      {item.kind === 'quiz' && (
+        <fieldset className="space-y-1.5">
+          <legend className="text-[12px] font-semibold text-faint">Options (pick the right one)</legend>
+          {options.map((o, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <input type="radio" name={`ans-${item.key}`} checked={answer === i} onChange={() => setAnswer(i)} aria-label={`Option ${i + 1} is the right answer`} className="accent-[var(--good)]" />
+              <input value={o} onChange={(e) => setOptions(options.map((x, k) => (k === i ? e.target.value : x)))} aria-label={`Option ${i + 1}`} className={field} />
+            </div>
+          ))}
+          {!valid && <p className="text-[12px] text-bad">Every option needs text, and no two options can be the same.</p>}
+        </fieldset>
+      )}
+      <div className="flex gap-2">
+        <Button className="py-1.5 text-sm" disabled={!valid} onClick={save}>
+          Save wording
+        </Button>
+        <Button variant="ghost" className="py-1.5 text-sm" onClick={onCancel}>
+          Cancel
+        </Button>
+      </div>
+      <p className="text-[12px] text-faint">It stays linked to sentence {item.sources.join(', ') || '(none)'}. Saving clears its OK so you can check the new wording.</p>
+    </div>
+  );
+}
+
+function Item({ item, sentences, selected, onSelect, onDecide, onEdit, locked }) {
+  const [editing, setEditing] = useState(false);
   const Icon = KIND_ICON[item.kind];
   const tone = item.decision === 'ok' ? 'border-good/50' : item.decision === 'remove' ? 'border-line opacity-60' : selected ? 'border-brand' : 'border-line';
   return (
     <li>
+      {/* Clicking a part, or moving keyboard focus into it, highlights its source sentences. */}
       <div
-        role="button"
-        tabIndex={0}
         onClick={onSelect}
-        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onSelect())}
-        aria-pressed={selected}
+        onFocusCapture={onSelect}
+        aria-current={selected ? 'true' : undefined}
         className={`rounded-xl border bg-surface p-4 transition ${tone} ${selected ? 'ring-2 ring-brand/30' : 'hover:border-brand/40'}`}
       >
         <div className="flex flex-wrap items-center gap-2 text-[12px] font-semibold text-faint">
           <Icon size={13} /> {item.label}
+          {item.edited && <Chip tone="info">Edited</Chip>}
           {item.inSource ? (
             <span className="font-normal">· from sentence {item.sources.join(', ')}</span>
           ) : (
@@ -31,6 +87,17 @@ function Item({ item, sentences, selected, onSelect, onDecide, locked }) {
             </Chip>
           )}
         </div>
+        {editing ? (
+          <Editor
+            item={item}
+            onCancel={() => setEditing(false)}
+            onSave={(patch) => {
+              onEdit(patch);
+              setEditing(false);
+            }}
+          />
+        ) : (
+          <>
         <p className={`mt-1.5 text-[15px] ${item.decision === 'remove' ? 'line-through' : ''}`}>{item.text}</p>
         {item.kind === 'quiz' && (
           <ul className="mt-2 space-y-1 text-[13px]">
@@ -43,6 +110,8 @@ function Item({ item, sentences, selected, onSelect, onDecide, locked }) {
           </ul>
         )}
         {item.kind === 'practice' && <p className="mt-1 text-[13px] text-muted">{item.detail}</p>}
+          </>
+        )}
         {!item.inSource && <p className="mt-2 text-[13px] text-bad">{item.problem}. It can only be removed.</p>}
         {item.inSource && (
           <blockquote className="mt-2 rounded-lg border-l-2 border-brand bg-brand-soft px-3 py-1.5 text-[13px] text-muted lg:hidden">
@@ -54,7 +123,7 @@ function Item({ item, sentences, selected, onSelect, onDecide, locked }) {
           </blockquote>
         )}
 
-        {!locked && (
+        {!locked && !editing && (
           <div className="mt-3 flex flex-wrap gap-2" onClick={(e) => e.stopPropagation()}>
             <button
               disabled={!item.inSource}
@@ -75,6 +144,12 @@ function Item({ item, sentences, selected, onSelect, onDecide, locked }) {
             >
               <LuX size={14} /> Remove
             </button>
+            <button
+              onClick={() => setEditing(true)}
+              className="ml-auto inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold text-muted hover:bg-surface-2 hover:text-ink"
+            >
+              <LuPencil size={14} /> Edit wording
+            </button>
           </div>
         )}
         {locked && item.decision && (
@@ -92,7 +167,7 @@ function Item({ item, sentences, selected, onSelect, onDecide, locked }) {
  * with no matching source sentence can only be removed. Approve publishes it; Send back keeps it as a draft
  * with a note.
  */
-export default function ReviewStep({ course, viewer, onDecide, onApprove, onSendBack }) {
+export default function ReviewStep({ course, viewer, onDecide, onEdit, onApprove, onSendBack }) {
   const summary = reviewSummary(course);
   const [selected, setSelected] = useState(summary.items[0]?.key);
   const [sending, setSending] = useState(false);
@@ -176,7 +251,7 @@ export default function ReviewStep({ course, viewer, onDecide, onApprove, onSend
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <ol className="space-y-2.5" aria-label="Parts of the course">
           {summary.items.map((item) => (
-            <Item key={item.key} item={item} sentences={summary.sentences} locked={locked} selected={item.key === selected} onSelect={() => setSelected(item.key)} onDecide={(d) => (setSelected(item.key), onDecide(item.key, d))} />
+            <Item key={item.key} item={item} sentences={summary.sentences} locked={locked} selected={item.key === selected} onSelect={() => setSelected(item.key)} onDecide={(d) => (setSelected(item.key), onDecide(item.key, d))} onEdit={(patch) => (setSelected(item.key), onEdit(item.key, patch))} />
           ))}
         </ol>
         <div className="lg:sticky lg:top-20 lg:self-start">
