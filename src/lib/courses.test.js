@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { nextCourseId, createCourse, sourceSentences, sourceTitle, addCourse, updateCourse, reviewSummary, decide, approveCourse, sendBackCourse, courseQuests } from './courses.js';
+import { nextCourseId, createCourse, sourceSentences, sourceTitle, addCourse, updateCourse, reviewSummary, decide, approveCourse, sendBackCourse, courseQuests, editItem } from './courses.js';
 import { emptyState, allQuests, findQuest, recommendQuests, completeQuest, applyProgress, applyAll, challengeProgress, skillInsights, approveQuest, questStatus } from './game.js';
 import { reps, teamChallenge } from '../data/academy.js';
 import { sampleDrafts } from '../data/drafts.js';
@@ -133,5 +133,47 @@ describe('approved courses become quests', () => {
     const { state: next, outcome } = completeQuest(state, 'MR', 'C1-practice', null, '2026-11-11');
     expect(outcome).toBe('submitted');
     expect(questStatus(approveQuest(next, 'MR', 'C1-practice'), 'MR', 'C1-practice')).toBe('done');
+  });
+});
+
+describe('editing a draft', () => {
+  it('changes the wording, keeps the source and marks it Edited', () => {
+    const c = decide(make(), 'lesson-0', 'ok');
+    const e = editItem(c, 'lesson-0', { text: '  Lumeva is a  monthly injection that lowers LDL cholesterol. ' });
+    expect(e.draft.lesson.points[0]).toEqual({ text: 'Lumeva is a monthly injection that lowers LDL cholesterol.', sources: [1] });
+    expect(e.edited).toEqual({ 'lesson-0': true });
+    expect(e.review['lesson-0']).toBeUndefined();
+    const item = reviewSummary(e).items[0];
+    expect(item).toMatchObject({ edited: true, inSource: true });
+    expect(c.draft.lesson.points[0].text).toBe('Lumeva is a once-monthly injection that lowers LDL cholesterol.');
+  });
+
+  it('edits a question, its options and the correct answer', () => {
+    const e = editItem(make(), 'quiz-1', { q: 'Most common side effect?', options: ['Headache', 'A mild reaction where the injection was given', 'Muscle pain', 'Feeling tired'], answer: 1 });
+    expect(e.draft.quiz[1]).toMatchObject({ q: 'Most common side effect?', answer: 1, sources: [6, 7] });
+    expect(e.draft.quiz[1].options[3]).toBe('Feeling tired');
+  });
+
+  it('edits the practice task', () => {
+    expect(editItem(make(), 'practice', { title: 'Two-minute Lumeva pitch' }).draft.practice.title).toBe('Two-minute Lumeva pitch');
+  });
+
+  it('ignores empty, repeated or unchanged edits, and approved courses', () => {
+    const c = make();
+    expect(editItem(c, 'lesson-0', { text: '  ' })).toBe(c);
+    expect(editItem(c, 'lesson-0', { text: c.draft.lesson.points[0].text })).toBe(c);
+    expect(editItem(c, 'quiz-0', { options: ['a', 'a', 'b', 'c'] })).toBe(c);
+    expect(editItem(c, 'quiz-0', { answer: 7 })).toBe(c);
+    expect(editItem(c, 'nope-1', { text: 'x' })).toBe(c);
+    const approved = { ...c, status: 'approved' };
+    expect(editItem(approved, 'lesson-0', { text: 'new' })).toBe(approved);
+  });
+
+  it('keeps edits through approval and into the quests', () => {
+    let c = editItem(make(), 'lesson-0', { text: 'Lumeva: one injection a month to lower LDL cholesterol.' });
+    for (const it of reviewSummary(c).items) c = decide(c, it.key, it.inSource ? 'ok' : 'remove');
+    c = approveCourse(c, 'Rui Costa', '2026-11-11');
+    expect(c.status).toBe('approved');
+    expect(courseQuests([c])[0].body[0]).toBe('Lumeva: one injection a month to lower LDL cholesterol.');
   });
 });

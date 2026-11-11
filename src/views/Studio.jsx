@@ -73,7 +73,7 @@ function Frame({ step, title, onBack, children }) {
   );
 }
 
-export default function Studio({ viewer, state, onCreate, onDecide, onApprove, onSendBack }) {
+export default function Studio({ viewer, state, onCreate, onDecide, onEdit, onApprove, onSendBack }) {
   const [mode, setMode] = useState({ name: 'list' });
   const courses = state.courses ?? [];
   const toList = () => setMode({ name: 'list' });
@@ -101,6 +101,7 @@ export default function Studio({ viewer, state, onCreate, onDecide, onApprove, o
           course={open}
           viewer={viewer}
           onDecide={(key, d) => onDecide(open.id, key, d)}
+          onEdit={(key, patch) => onEdit(open.id, key, patch)}
           onApprove={() => onApprove(open.id)}
           onSendBack={(note) => onSendBack(open.id, note)}
         />

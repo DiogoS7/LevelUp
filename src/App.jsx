@@ -8,7 +8,7 @@ import Quests from './views/Quests.jsx';
 import Leaderboard from './views/Leaderboard.jsx';
 import Team from './views/Team.jsx';
 import Studio from './views/Studio.jsx';
-import { createCourse, addCourse, updateCourse, decide, approveCourse, sendBackCourse } from './lib/courses.js';
+import { createCourse, addCourse, updateCourse, decide, approveCourse, sendBackCourse, editItem } from './lib/courses.js';
 import { recordAttempt, simulateTeam } from './lib/insights.js';
 import { reps as baseReps, DEFAULT_REP, initialPending, company, skillById, skills, personById, isStaff } from './data/academy.js';
 import {
@@ -200,6 +200,7 @@ export default function App() {
         state={game}
         onCreate={createDraft}
         onDecide={(id, key, d) => changeCourse(id, (c) => decide(c, key, d))}
+        onEdit={(id, key, patch) => changeCourse(id, (c) => editItem(c, key, patch))}
         onApprove={(id) => {
           changeCourse(id, (c) => approveCourse(c, viewer.name, today()));
           toast('Course approved', 'It is live in Learn for every rep, tagged New.', 'gold');
