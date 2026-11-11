@@ -1,7 +1,7 @@
 {
   "name": "levelup",
   "private": true,
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Gamified skills platform for field sales teams: skill gaps, in-demand skills, quests, XP, badges and team insights.",
   "type": "module",
   "scripts": {
