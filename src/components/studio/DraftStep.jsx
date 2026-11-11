@@ -3,12 +3,15 @@ import { LuCheck, LuLoaderCircle, LuTriangleAlert, LuRotateCcw, LuArrowLeft, LuS
 import Card from '../Card.jsx';
 import { Button } from '../ui.jsx';
 import { DRAFT_STEPS, draftCourse } from '../../lib/draft.js';
+import { getKey } from '../../lib/claude.js';
+import { sourceSentences } from '../../lib/courses.js';
+import { skillById } from '../../data/academy.js';
 
 /**
  * Step 2: draft the course with AI. Shows each step as it happens; on failure explains in plain words and
  * offers to try again. Calls onDone(draft) when the draft is ready.
  */
-export default function DraftStep({ request, onDone, onBack }) {
+export default function DraftStep({ request, onDone, onBack, onConnect = () => {} }) {
   const [step, setStep] = useState(0);
   const [error, setError] = useState(null);
   const [attempt, setAttempt] = useState(0);
@@ -20,7 +23,12 @@ export default function DraftStep({ request, onDone, onBack }) {
     let alive = true;
     setError(null);
     setStep(0);
-    draftCourse(request.source, { onStep: (i) => alive && setStep(i) })
+    draftCourse(request.source, {
+      onStep: (i) => alive && setStep(i),
+      key: getKey(),
+      skillName: skillById[request.skill]?.name ?? '',
+      sentences: sourceSentences(request.source),
+    })
       .then((draft) => alive && done.current(draft))
       .catch((e) => alive && setError({ message: e.message || 'Something went wrong while drafting.', needsClaude: Boolean(e.needsClaude) }));
     return () => {
@@ -66,8 +74,18 @@ export default function DraftStep({ request, onDone, onBack }) {
                 <LuRotateCcw size={15} /> Try again
               </Button>
             )}
-            <Button variant={error.needsClaude ? 'primary' : 'secondary'} onClick={onBack}>
-              <LuArrowLeft size={15} /> {error.needsClaude ? 'Choose a built-in document' : 'Back to the source'}
+            {error.needsClaude && (
+              <Button
+                onClick={() => {
+                  onConnect();
+                  onBack();
+                }}
+              >
+                Connect Claude
+              </Button>
+            )}
+            <Button variant="secondary" onClick={onBack}>
+              <LuArrowLeft size={15} /> Back to the source
             </Button>
           </div>
         </div>

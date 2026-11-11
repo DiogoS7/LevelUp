@@ -3,6 +3,10 @@
  * and the offline drafting used for the built-in documents. Pure functions, tested in draft.test.js.
  */
 import { sampleDrafts } from '../data/drafts.js';
+import { DraftError } from './draft-error.js';
+import { requestDraft } from './claude.js';
+
+export { DraftError };
 
 export const QUIZ_LENGTH = 3;
 export const OPTIONS_PER_QUESTION = 4;
@@ -88,29 +92,31 @@ export function validateDraft(draft) {
   return problems;
 }
 
-export class DraftError extends Error {
-  constructor(message, { needsClaude = false } = {}) {
-    super(message);
-    this.name = 'DraftError';
-    this.needsClaude = needsClaude;
-  }
-}
-
 export const DRAFT_STEPS = ['Reading the document', 'Writing the lesson', 'Writing the quiz and practice task', 'Matching every part to its source sentence'];
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /**
- * Draft a course. Built-in documents use the prepared output (works offline, no key). Pasted text needs
- * the Claude option, which arrives in v2.1. onStep(i) reports progress through DRAFT_STEPS.
+ * Draft a course. Built-in documents use the prepared output (works offline, no key). Pasted text is drafted
+ * by Claude with the visitor's own API key; without one, it explains how to connect. onStep(i) reports
+ * progress through DRAFT_STEPS.
  */
-export async function draftCourse(source, { onStep = () => {}, delay = 650 } = {}) {
+export async function draftCourse(source, { onStep = () => {}, delay = 650, key = '', skillName = '', sentences = [], fetchImpl } = {}) {
+  if (source.kind !== 'builtin') {
+    if (!key) throw new DraftError('Drafting your own text needs the optional Claude connection. Add your own Claude API key in Connect Claude, or try one of the built-in documents.', { needsClaude: true });
+    onStep(0);
+    await wait(delay);
+    onStep(1);
+    const draft = await requestDraft({ key, sentences, skillName, title: source.title, fetchImpl });
+    onStep(3);
+    const problems = validateDraft(draft);
+    if (problems.length) throw new DraftError(`Claude's draft came back incomplete: ${problems[0]} Please try again.`);
+    await wait(delay);
+    return draft;
+  }
   for (let i = 0; i < DRAFT_STEPS.length; i += 1) {
     onStep(i);
     await wait(delay);
-  }
-  if (source.kind !== 'builtin') {
-    throw new DraftError('Drafting from your own text needs the Claude option, which is coming in v2.1. For now, try one of the built-in documents.', { needsClaude: true });
   }
   const draft = sampleDrafts[source.docId];
   if (!draft) throw new DraftError('There is no prepared draft for this document.');
