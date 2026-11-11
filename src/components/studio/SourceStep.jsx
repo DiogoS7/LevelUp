@@ -11,7 +11,7 @@ import { splitSentences, countWords, MAX_WORDS } from '../../lib/sentences.js';
  * Step 1 of a new course: pick a built-in document or paste your own text, choose the skill it trains,
  * and read it as numbered sentences. Calls onDraft({ source, skill, title }) when the user is ready.
  */
-export default function SourceStep({ initial, onDraft, onCancel }) {
+export default function SourceStep({ initial, connected = false, onConnect = () => {}, onDraft, onCancel }) {
   const from = initial?.source;
   const [choice, setChoice] = useState(from ? (from.kind === 'builtin' ? from.docId : 'paste') : sourceDocs[0].id);
   const [pasteTitle, setPasteTitle] = useState(from?.kind === 'pasted' ? from.title : '');
@@ -85,9 +85,17 @@ export default function SourceStep({ initial, onDraft, onCancel }) {
             <p className={`text-[13px] ${tooLong ? 'font-semibold text-bad' : 'text-faint'}`}>
               {words.toLocaleString('en')} / {MAX_WORDS.toLocaleString('en')} words{tooLong ? ': please shorten it.' : ''}
             </p>
-            <p className="rounded-xl bg-amber-soft px-3 py-2 text-[13px] text-ink">
-              Drafting from your own text uses the optional Claude connection, coming in v2.1. The built-in documents work right away.
-            </p>
+            {connected ? (
+              <p className="rounded-xl bg-good-soft px-3 py-2 text-[13px] text-ink">Claude will draft this with your API key, using only this text.</p>
+            ) : (
+              <p className="rounded-xl bg-amber-soft px-3 py-2 text-[13px] text-ink">
+                Drafting your own text uses the optional Claude connection.{' '}
+                <button type="button" onClick={onConnect} className="font-semibold text-brand underline">
+                  Connect Claude
+                </button>{' '}
+                with your own API key, or pick a built-in document.
+              </p>
+            )}
           </div>
         )}
 

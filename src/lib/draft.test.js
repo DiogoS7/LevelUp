@@ -70,8 +70,8 @@ describe('drafting', () => {
     d.quiz[0].q = 'changed';
     expect(sampleDrafts['objections-guide'].quiz[0].q).not.toBe('changed');
   });
-  it('explains that pasted text needs the Claude option', async () => {
-    await expect(draftCourse({ kind: 'pasted', text: 'x' }, { delay: 0 })).rejects.toThrow('Claude option');
+  it('explains that pasted text needs the Claude connection when there is no key', async () => {
+    await expect(draftCourse({ kind: 'pasted', text: 'x' }, { delay: 0 })).rejects.toThrow('Claude connection');
   });
   it('fails clearly for an unknown document', async () => {
     let err;

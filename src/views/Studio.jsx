@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { LuPlus, LuFileText, LuCircleCheck, LuPencilLine, LuShieldCheck, LuSparkles, LuBookOpen, LuArrowLeft } from 'react-icons/lu';
+import { LuPlus, LuFileText, LuCircleCheck, LuPencilLine, LuShieldCheck, LuSparkles, LuBookOpen, LuArrowLeft, LuKeyRound } from 'react-icons/lu';
 import Card, { CardHeader } from '../components/Card.jsx';
 import { Button, Chip } from '../components/ui.jsx';
 import { skillById } from '../data/academy.js';
 import SourceStep from '../components/studio/SourceStep.jsx';
 import DraftStep from '../components/studio/DraftStep.jsx';
 import ReviewStep from '../components/studio/ReviewStep.jsx';
+import ClaudeConnect from '../components/studio/ClaudeConnect.jsx';
+import { getKey } from '../lib/claude.js';
 
 const STEPS = [
   { icon: LuFileText, title: 'Pick a source', text: 'Start from approved company material, like a product leaflet or a field guide.' },
@@ -75,6 +77,9 @@ function Frame({ step, title, onBack, children }) {
 
 export default function Studio({ viewer, state, onCreate, onDecide, onEdit, onApprove, onSendBack }) {
   const [mode, setMode] = useState({ name: 'list' });
+  const [connecting, setConnecting] = useState(false);
+  const [connected, setConnected] = useState(() => Boolean(getKey()));
+  const connect = <ClaudeConnect open={connecting} onClose={() => setConnecting(false)} onChange={setConnected} />;
   const courses = state.courses ?? [];
   const toList = () => setMode({ name: 'list' });
   const onOpen = (id) => setMode({ name: 'course', id });
@@ -82,14 +87,21 @@ export default function Studio({ viewer, state, onCreate, onDecide, onEdit, onAp
   if (mode.name === 'new') {
     return (
       <Frame step={1} title="New course" onBack={toList}>
-        <SourceStep initial={mode.request} onDraft={(request) => setMode({ name: 'drafting', request })} onCancel={toList} />
+        <SourceStep initial={mode.request} connected={connected} onConnect={() => setConnecting(true)} onDraft={(request) => setMode({ name: 'drafting', request })} onCancel={toList} />
+        {connect}
       </Frame>
     );
   }
   if (mode.name === 'drafting') {
     return (
       <Frame step={2} title="New course" onBack={toList}>
-        <DraftStep request={mode.request} onBack={() => setMode({ name: 'new', request: mode.request })} onDone={(draft) => onOpen(onCreate(mode.request, draft))} />
+        <DraftStep
+          request={mode.request}
+          onBack={() => setMode({ name: 'new', request: mode.request })}
+          onConnect={() => setConnecting(true)}
+          onDone={(draft) => onOpen(onCreate(mode.request, draft))}
+        />
+        {connect}
       </Frame>
     );
   }
@@ -123,9 +135,15 @@ export default function Studio({ viewer, state, onCreate, onDecide, onEdit, onAp
         <p className="mt-3 max-w-2xl text-[17px] text-muted">
           AI drafts the course, you check every part of it against the source, and once you approve it the reps can play it straight away as a quest.
         </p>
-        <Button className="mt-6 px-6 py-3 text-[15px]" onClick={() => setMode({ name: 'new' })}>
-          <LuPlus size={17} /> New course
-        </Button>
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <Button className="px-6 py-3 text-[15px]" onClick={() => setMode({ name: 'new' })}>
+            <LuPlus size={17} /> New course
+          </Button>
+          <Button variant="secondary" className="py-3" onClick={() => setConnecting(true)}>
+            <LuKeyRound size={16} /> {connected ? 'Claude connected' : 'Connect Claude (optional)'}
+          </Button>
+        </div>
+        {connect}
       </section>
 
       <ol className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
