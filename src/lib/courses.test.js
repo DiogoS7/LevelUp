@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { nextCourseId, createCourse, sourceSentences, sourceTitle, addCourse, updateCourse, reviewSummary, decide, approveCourse, sendBackCourse } from './courses.js';
-import { emptyState } from './game.js';
+import { nextCourseId, createCourse, sourceSentences, sourceTitle, addCourse, updateCourse, reviewSummary, decide, approveCourse, sendBackCourse, courseQuests } from './courses.js';
+import { emptyState, allQuests, findQuest, recommendQuests, completeQuest, applyProgress, applyAll, challengeProgress, skillInsights, approveQuest, questStatus } from './game.js';
+import { reps, teamChallenge } from '../data/academy.js';
 import { sampleDrafts } from '../data/drafts.js';
 
 const lumeva = { kind: 'builtin', docId: 'lumeva-leaflet' };
@@ -76,5 +77,61 @@ describe('reviewing a draft', () => {
     const c = make();
     expect(sendBackCourse(c, '  ', 'Rui Costa')).toBe(c);
     expect(sendBackCourse(c, 'Check the dosing point', 'Rui Costa')).toMatchObject({ status: 'draft', note: 'Check the dosing point', noteBy: 'Rui Costa' });
+  });
+});
+
+describe('approved courses become quests', () => {
+  const approved = () => {
+    let c = make();
+    for (const it of reviewSummary(c).items) c = decide(c, it.key, it.inSource ? 'ok' : 'remove');
+    return approveCourse(c, 'Beatriz Lima', '2026-11-11');
+  };
+
+  it('gives nothing for drafts', () => {
+    expect(courseQuests([make()])).toEqual([]);
+  });
+
+  it('turns an approved course into a lesson, a quiz and a practice task, all tagged New', () => {
+    const q = courseQuests([approved()]);
+    expect(q.map((x) => x.id)).toEqual(['C1-lesson', 'C1-quiz', 'C1-practice']);
+    expect(q.every((x) => x.isNew && x.skill === 'sci-lumeva')).toBe(true);
+    expect(q[0].body).toHaveLength(5);
+    expect(q[0].body.join(' ')).not.toContain('dislike taking tablets');
+    expect(q[1].questions).toHaveLength(3);
+    expect(q[2].type).toBe('roleplay');
+  });
+
+  it('leaves out removed parts', () => {
+    let c = make();
+    for (const it of reviewSummary(c).items) c = decide(c, it.key, it.inSource && it.key !== 'quiz-1' && it.key !== 'practice' ? 'ok' : 'remove');
+    c = approveCourse(c, 'Rui Costa', '2026-11-11');
+    const q = courseQuests([c]);
+    expect(q.map((x) => x.id)).toEqual(['C1-lesson', 'C1-quiz']);
+    expect(q[1].questions.map((x) => x.q)).toEqual(['Who is Lumeva for?', 'A patient missed a dose. What should they do?']);
+  });
+
+  it('plays with the v1 rules: XP, skill progress, team goal and recommendations', () => {
+    const state = addCourse(emptyState(), approved());
+    const marta = reps.find((r) => r.id === 'MR');
+    expect(allQuests(state).length).toBe(allQuests(emptyState()).length + 3);
+    expect(findQuest(state, 'C1-quiz').title).toBe('Lumeva in practice: quiz');
+    expect(recommendQuests(marta, state, 1)[0].quest.courseId).toBe('C1');
+
+    const { state: next, outcome } = completeQuest(state, 'MR', 'C1-quiz', { score: 3, total: 3 }, '2026-11-11');
+    expect(outcome).toBe('completed');
+    const after = applyProgress(marta, next);
+    expect(after.skills['sci-lumeva']).toBe(marta.skills['sci-lumeva'] + 60);
+    expect(after.xp).toBe(marta.xp + 80);
+    expect(challengeProgress(teamChallenge, next).done).toBe(teamChallenge.baseDone + 1);
+
+    const gap = (st) => skillInsights(applyAll(reps, st)).find((i) => i.skill.id === 'sci-lumeva').levelsToGo;
+    expect(gap(next)).toBe(gap(state) - 1);
+  });
+
+  it('sends a course practice task to the team lead like any other', () => {
+    const state = addCourse(emptyState(), approved());
+    const { state: next, outcome } = completeQuest(state, 'MR', 'C1-practice', null, '2026-11-11');
+    expect(outcome).toBe('submitted');
+    expect(questStatus(approveQuest(next, 'MR', 'C1-practice'), 'MR', 'C1-practice')).toBe('done');
   });
 });

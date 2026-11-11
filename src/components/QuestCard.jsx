@@ -22,7 +22,14 @@ export default function QuestCard({ quest, status = 'open', reason, onStart, com
       </span>
       <span className="min-w-0 flex-1">
         <span className="flex items-start justify-between gap-2">
-          <span className="text-sm leading-snug font-semibold">{quest.title}</span>
+          <span className="text-sm leading-snug font-semibold">
+            {quest.title}
+            {quest.isNew && (
+              <Chip tone="info" className="ml-1.5 align-middle">
+                New
+              </Chip>
+            )}
+          </span>
           <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-amber-ink">
             <LuZap size={12} /> {quest.xp}
           </span>

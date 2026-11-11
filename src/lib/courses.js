@@ -87,3 +87,38 @@ export function sendBackCourse(course, note, by) {
   if (!text) return course;
   return { ...course, status: 'draft', note: text, noteBy: by };
 }
+
+/* ------------------------------------------------------------ live quests */
+
+export const COURSE_QUEST_REWARDS = {
+  lesson: { minutes: 5, xp: 40, points: 40 },
+  quiz: { minutes: 3, xp: 60, points: 60 },
+  roleplay: { minutes: 15, xp: 120, points: 90 },
+};
+
+/**
+ * Approved courses as quests: a lesson, a quiz and (if kept) a practice task, using only the parts the
+ * reviewer marked OK. They are tagged isNew and played with the same rules as every other quest.
+ */
+export function courseQuests(courses = []) {
+  const out = [];
+  for (const c of courses) {
+    if (c.status !== 'approved') continue;
+    const kept = (key) => c.review?.[key] === 'ok';
+    const base = { skill: c.skill, isNew: true, courseId: c.id };
+    const points = c.draft.lesson.points.filter((_, i) => kept(`lesson-${i}`)).map((p) => p.text);
+    if (points.length) out.push({ ...base, ...COURSE_QUEST_REWARDS.lesson, id: `${c.id}-lesson`, type: 'lesson', title: c.draft.lesson.title || c.title, body: points });
+    const questions = c.draft.quiz.filter((_, i) => kept(`quiz-${i}`)).map(({ q, options, answer }) => ({ q, options, answer }));
+    if (questions.length) out.push({ ...base, ...COURSE_QUEST_REWARDS.quiz, id: `${c.id}-quiz`, type: 'quiz', title: `${c.title}: quiz`, questions });
+    if (c.draft.practice && kept('practice'))
+      out.push({
+        ...base,
+        ...COURSE_QUEST_REWARDS.roleplay,
+        id: `${c.id}-practice`,
+        type: 'roleplay',
+        title: c.draft.practice.title,
+        body: [c.draft.practice.text, 'Your team lead gives it a quick yes before the XP is added.'],
+      });
+  }
+  return out;
+}

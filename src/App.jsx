@@ -9,9 +9,10 @@ import Leaderboard from './views/Leaderboard.jsx';
 import Team from './views/Team.jsx';
 import Studio from './views/Studio.jsx';
 import { createCourse, addCourse, updateCourse, decide, approveCourse, sendBackCourse } from './lib/courses.js';
-import { reps as baseReps, DEFAULT_REP, initialPending, company, questById, skillById, skills, personById, isStaff } from './data/academy.js';
+import { reps as baseReps, DEFAULT_REP, initialPending, company, skillById, skills, personById, isStaff } from './data/academy.js';
 import {
   emptyState,
+  findQuest,
   completeQuest,
   approveQuest,
   returnQuest,
@@ -156,13 +157,13 @@ export default function App() {
     const before = reps.find((r) => r.id === forRep);
     const after = applyAll([baseReps.find((r) => r.id === forRep)], next)[0];
     setGame(next);
-    toast('Approved', `${before.name} earns ${questById[questId].xp} XP for "${questById[questId].title}".`, 'gold');
+    toast('Approved', `${before.name} earns ${findQuest(game, questId).xp} XP for "${findQuest(game, questId).title}".`, 'gold');
     announce(before, after, next);
   };
 
   const sendBack = (forRep, questId) => {
     setGame(returnQuest(game, forRep, questId));
-    toast('Sent back with feedback', `${baseReps.find((r) => r.id === forRep).name} can try "${questById[questId].title}" again.`, 'blue');
+    toast('Sent back with feedback', `${baseReps.find((r) => r.id === forRep).name} can try "${findQuest(game, questId).title}" again.`, 'blue');
   };
 
   const reset = () => {
@@ -197,7 +198,7 @@ export default function App() {
         onDecide={(id, key, d) => changeCourse(id, (c) => decide(c, key, d))}
         onApprove={(id) => {
           changeCourse(id, (c) => approveCourse(c, viewer.name, today()));
-          toast('Course approved', 'Recorded with your name and today’s date.', 'gold');
+          toast('Course approved', 'It is live in Learn for every rep, tagged New.', 'gold');
         }}
         onSendBack={(id, note) => {
           changeCourse(id, (c) => sendBackCourse(c, note, viewer.name));

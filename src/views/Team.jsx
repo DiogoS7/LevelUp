@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { LuUsers, LuFlame, LuListChecks, LuRocket, LuDownload, LuCheck, LuUndo2, LuBellRing, LuCircleCheck, LuTriangleAlert, LuCircleAlert } from 'react-icons/lu';
 import Card, { CardHeader } from '../components/Card.jsx';
 import { Avatar, Chip, Button, Stat, InfoTip, QUEST_ICONS } from '../components/ui.jsx';
-import { skills, teams, teamById, adoptionHistory, questById, skillById, categoryById } from '../data/academy.js';
-import { skillInsights, launchReadiness, adoption, skillLevel, targetFor, skillsMatrixCsv, teamFindings, levelName } from '../lib/game.js';
+import { skills, teams, teamById, adoptionHistory, skillById, categoryById } from '../data/academy.js';
+import { skillInsights, launchReadiness, adoption, skillLevel, targetFor, skillsMatrixCsv, teamFindings, levelName, findQuest } from '../lib/game.js';
 
 const STATUS_TONE = { 'Act now': 'critical', 'Keep an eye on': 'demand', 'On track': 'good' };
 const FINDING = {
@@ -190,7 +190,7 @@ export default function Team({ reps, state, onApprove, onReturn, onNudge }) {
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-medium">{it.skill.name}</span>
                   <span className="block text-[11px] text-muted">
-                    {it.below} of {group.length} people below the level they need
+                    {it.below} of {group.length} below the level they need · {it.levelsToGo} level{it.levelsToGo === 1 ? '' : 's'} to go in total
                   </span>
                 </span>
                 <Chip tone={STATUS_TONE[it.status]}>{it.status}</Chip>
@@ -278,7 +278,8 @@ export default function Team({ reps, state, onApprove, onReturn, onNudge }) {
           <div className="mt-3 space-y-2">
             {pending.length === 0 && <p className="text-sm text-muted">Nothing to review. All caught up.</p>}
             {pending.map((p) => {
-              const quest = questById[p.questId];
+              const quest = findQuest(state, p.questId);
+              if (!quest) return null;
               const Icon = QUEST_ICONS[quest.type];
               return (
                 <div key={`${p.repId}-${p.questId}`} className="card-inset rounded-xl p-3">
