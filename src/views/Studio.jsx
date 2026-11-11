@@ -4,6 +4,8 @@ import Card, { CardHeader } from '../components/Card.jsx';
 import { Button, Chip } from '../components/ui.jsx';
 import { skillById } from '../data/academy.js';
 import SourceStep from '../components/studio/SourceStep.jsx';
+import DraftStep from '../components/studio/DraftStep.jsx';
+import { draftItems } from '../lib/draft.js';
 
 const STEPS = [
   { icon: LuFileText, title: 'Pick a source', text: 'Start from approved company material, like a product leaflet or a field guide.' },
@@ -56,22 +58,65 @@ function Stepper({ step }) {
   );
 }
 
-export default function Studio({ viewer, state, onDraft, onOpen = () => {} }) {
-  const [mode, setMode] = useState('list');
-  const courses = state.courses ?? [];
-
-  if (mode === 'new') {
-    return (
-      <div className="grid grid-cols-1 gap-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-          <button onClick={() => setMode('list')} className="flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline">
-            <LuArrowLeft size={15} /> Course studio
-          </button>
-          <Stepper step={1} />
-        </div>
-        <h1 className="text-3xl font-extrabold tracking-tight">New course</h1>
-        <SourceStep onDraft={onDraft} onCancel={() => setMode('list')} />
+function Frame({ step, title, onBack, children }) {
+  return (
+    <div className="grid grid-cols-1 gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+        <button onClick={onBack} className="flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline">
+          <LuArrowLeft size={15} /> Course studio
+        </button>
+        <Stepper step={step} />
       </div>
+      <h1 className="text-3xl font-extrabold tracking-tight">{title}</h1>
+      {children}
+    </div>
+  );
+}
+
+/** Read-only look at a drafted course (the review screen replaces this in US-04). */
+function CoursePreview({ course }) {
+  return (
+    <Card className="p-5 sm:p-6">
+      <p className="text-sm text-muted">Saved as a draft. Nothing is visible to reps until it is reviewed and approved.</p>
+      <ul className="mt-4 space-y-2">
+        {draftItems(course.draft).map((it) => (
+          <li key={it.key} className="card-inset rounded-xl px-4 py-2.5 text-sm">
+            <span className="text-[12px] font-semibold text-faint">{it.label}</span>
+            <span className="block">{it.text}</span>
+            <span className="text-[12px] text-faint">{it.sources.length ? `From sentence ${it.sources.join(', ')}` : 'No source given'}</span>
+          </li>
+        ))}
+      </ul>
+    </Card>
+  );
+}
+
+export default function Studio({ viewer, state, onCreate }) {
+  const [mode, setMode] = useState({ name: 'list' });
+  const courses = state.courses ?? [];
+  const toList = () => setMode({ name: 'list' });
+  const onOpen = (id) => setMode({ name: 'course', id });
+
+  if (mode.name === 'new') {
+    return (
+      <Frame step={1} title="New course" onBack={toList}>
+        <SourceStep initial={mode.request} onDraft={(request) => setMode({ name: 'drafting', request })} onCancel={toList} />
+      </Frame>
+    );
+  }
+  if (mode.name === 'drafting') {
+    return (
+      <Frame step={2} title="New course" onBack={toList}>
+        <DraftStep request={mode.request} onBack={() => setMode({ name: 'new', request: mode.request })} onDone={(draft) => onOpen(onCreate(mode.request, draft))} />
+      </Frame>
+    );
+  }
+  const open = mode.name === 'course' && courses.find((c) => c.id === mode.id);
+  if (open) {
+    return (
+      <Frame step={3} title={open.title} onBack={toList}>
+        <CoursePreview course={open} />
+      </Frame>
     );
   }
   const drafts = courses.filter((c) => c.status !== 'approved');
@@ -89,7 +134,7 @@ export default function Studio({ viewer, state, onDraft, onOpen = () => {} }) {
         <p className="mt-3 max-w-2xl text-[17px] text-muted">
           AI drafts the course, you check every part of it against the source, and once you approve it the reps can play it straight away as a quest.
         </p>
-        <Button className="mt-6 px-6 py-3 text-[15px]" onClick={() => setMode('new')}>
+        <Button className="mt-6 px-6 py-3 text-[15px]" onClick={() => setMode({ name: 'new' })}>
           <LuPlus size={17} /> New course
         </Button>
       </section>

@@ -11,11 +11,12 @@ import { splitSentences, countWords, MAX_WORDS } from '../../lib/sentences.js';
  * Step 1 of a new course: pick a built-in document or paste your own text, choose the skill it trains,
  * and read it as numbered sentences. Calls onDraft({ source, skill, title }) when the user is ready.
  */
-export default function SourceStep({ onDraft, onCancel }) {
-  const [choice, setChoice] = useState(sourceDocs[0].id);
-  const [pasteTitle, setPasteTitle] = useState('');
-  const [pasteText, setPasteText] = useState('');
-  const [skill, setSkill] = useState(sourceDocs[0].skill);
+export default function SourceStep({ initial, onDraft, onCancel }) {
+  const from = initial?.source;
+  const [choice, setChoice] = useState(from ? (from.kind === 'builtin' ? from.docId : 'paste') : sourceDocs[0].id);
+  const [pasteTitle, setPasteTitle] = useState(from?.kind === 'pasted' ? from.title : '');
+  const [pasteText, setPasteText] = useState(from?.kind === 'pasted' ? from.text : '');
+  const [skill, setSkill] = useState(initial?.skill ?? sourceDocs[0].skill);
 
   const doc = sourceDocs.find((d) => d.id === choice);
   const text = doc ? docText(doc) : pasteText;
@@ -83,6 +84,9 @@ export default function SourceStep({ onDraft, onCancel }) {
             />
             <p className={`text-[13px] ${tooLong ? 'font-semibold text-bad' : 'text-faint'}`}>
               {words.toLocaleString('en')} / {MAX_WORDS.toLocaleString('en')} words{tooLong ? ': please shorten it.' : ''}
+            </p>
+            <p className="rounded-xl bg-amber-soft px-3 py-2 text-[13px] text-ink">
+              Drafting from your own text uses the optional Claude connection, coming in v2.1. The built-in documents work right away.
             </p>
           </div>
         )}

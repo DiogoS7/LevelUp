@@ -8,6 +8,7 @@ import Quests from './views/Quests.jsx';
 import Leaderboard from './views/Leaderboard.jsx';
 import Team from './views/Team.jsx';
 import Studio from './views/Studio.jsx';
+import { createCourse, addCourse } from './lib/courses.js';
 import { reps as baseReps, DEFAULT_REP, initialPending, company, questById, skillById, skills, personById, isStaff } from './data/academy.js';
 import {
   emptyState,
@@ -22,6 +23,7 @@ import {
 } from './lib/game.js';
 
 const STORAGE_KEY = 'levelup:v1';
+const today = () => new Date().toISOString().slice(0, 10);
 const SEEN_KEY = 'levelup-welcome-seen';
 
 function seenWelcome() {
@@ -168,6 +170,14 @@ export default function App() {
     toast('Started again', 'All demo progress in this browser was cleared.', 'blue');
   };
 
+  /** Save a freshly drafted course and return its id. */
+  const createDraft = (request, draft) => {
+    const course = createCourse(game.courses, { ...request, draft, by: viewer.name, date: today() });
+    setGame((g) => addCourse(g, course));
+    toast('Draft saved', `“${course.title}” is waiting for a review.`, 'blue');
+    return course.id;
+  };
+
   const startQuest = (quest) => {
     setOpenSkill(null);
     setActiveQuest(quest);
@@ -177,7 +187,7 @@ export default function App() {
   if (tab === 'skills') view = <Skills rep={rep} onOpenSkill={setOpenSkill} />;
   else if (tab === 'quests') view = <Quests rep={rep} state={game} onStart={startQuest} />;
   else if (tab === 'league') view = <Leaderboard reps={reps} currentId={repId} />;
-  else if (tab === 'studio') view = <Studio viewer={viewer} state={game} onDraft={() => toast('Coming next', 'AI drafting arrives in US-03.', 'blue')} />;
+  else if (tab === 'studio') view = <Studio viewer={viewer} state={game} onCreate={createDraft} />;
   else if (tab === 'team')
     view = <Team reps={reps} state={game} onApprove={approve} onReturn={sendBack} onNudge={(r) => toast('Reminder sent', `${r.name} got a friendly nudge and a 5-minute quest.`, 'blue')} />;
   else
