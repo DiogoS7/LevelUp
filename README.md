@@ -12,7 +12,7 @@ LevelUp is a learning app for a sales team that feels like a game. It follows th
 2. **How do I learn it without losing a day?** Through quests: a 5-minute lesson, a 3-question quiz or a short practice task. Each one earns points (XP), keeps a daily streak going and can unlock badges.
 3. **What does the whole team need?** Managers see which skills the team is missing, who is ready for the launch, who has stopped learning, and which practice tasks are waiting for their review.
 
-**New in v2.0: the Course studio.** AI creates the training, the game gets people to do it, and managers see the gaps close. [Jump to the Course studio](#course-studio-new-in-v20).
+**New in v2: the Course studio.** AI creates the training, the game gets people to do it, and managers see the gaps close. [Jump to the Course studio](#course-studio).
 
 ## The problem it solves
 
@@ -38,26 +38,54 @@ Below that: which skills to train first (how many people lack each skill against
 
 ![For managers: headlines, numbers and which skills to train first](assets/screenshots/managers.webp)
 
-## Course studio (new in v2.0)
+## Course studio
 
-Managers and Learning & Development turn a company document into a short course. AI drafts it, a person checks every part against the document, and once it's approved the reps can play it straight away.
+Managers and Learning & Development turn a company document into a short course. AI drafts it, a person checks every part against the document, and once it's approved the reps can play it straight away. Afterwards, managers see which questions the team gets wrong, so they know what to retrain.
 
-1. **Pick a source.** Start from approved material: the built-in Lumeva product leaflet or the field guide to handling a doctor's objections (both made up). Choose the skill the course trains. The document is shown as numbered sentences.
-2. **Let AI draft it.** LevelUp drafts a 5-minute lesson, a 3-question quiz and a practice task. Every point and question lists the sentences it came from. The built-in documents use prepared sample output, so the demo works offline with no API key.
-3. **Check it against the source.** Each part sits next to the document with its sentences highlighted. Mark it **OK** or **Remove**. Anything that isn't in the document is flagged **Not in the source** and can only be removed. Each sample draft has one of these on purpose, to show the check working.
+1. **Pick a source.** Start from approved material: the built-in Lumeva product leaflet or the field guide to handling a doctor's objections (both made up), or paste your own text. Choose the skill the course trains. The document is shown as numbered sentences.
+2. **Let AI draft it.** LevelUp drafts a 5-minute lesson, a 3-question quiz and a practice task. Every point and question lists the sentences it came from. The built-in documents use prepared sample output, so the demo works offline with no API key. Your own pasted text is drafted by Claude, using your own key (see below).
+3. **Check it against the source.** This is the human step, and nothing reaches the reps without it. Each part sits next to the document with its sentences highlighted, and the reviewer marks it **OK** or **Remove**. Anything that isn't in the document is flagged **Not in the source** and can only be removed. The reviewer can also **edit the wording** of any part: it stays linked to its sentences, shows an **Edited** label and needs a fresh OK. Each sample draft includes one invented claim on purpose, so you can see the check catch it.
 4. **Approve and it goes live.** Approving records who approved it and when. The course appears in **Learn** for every rep, tagged **New**, and earns XP, streaks and badges like any other quest. **Send back** keeps it as a draft with a note.
-
-Nothing reaches the reps until a person approves it.
+5. **See what to retrain.** **For managers** shows, per course, how many people finished it, the average score, and every question with how many got it wrong ("10 of 12 got this wrong"), most-missed first. It can be downloaded as CSV.
 
 | Course studio | Review against the source |
 | --- | --- |
 | ![Course studio](assets/screenshots/studio.webp) | ![Review against the source](assets/screenshots/studio-review.webp) |
 
+| Edit the wording before approving | How the team did on new courses |
+| --- | --- |
+| ![Edit the wording before approving](assets/screenshots/studio-edit.webp) | ![How the team did on new courses](assets/screenshots/quiz-insights.webp) |
+
 | Choose a source | The new course in Learn |
 | --- | --- |
 | ![Choose a source](assets/screenshots/studio-source.webp) | ![The new course in Learn](assets/screenshots/learn-new.webp) |
 
-**Try the whole loop:** open the menu in the top-right corner and choose **Beatriz Lima** (L&D lead) → **Course studio** → **New course** → **Draft course** → mark every part OK or Remove → **Approve**. Then switch to **Marta Ribeiro**, play *Lumeva in practice: quiz* in **Learn**, switch back and open **For managers**: Lumeva launch knowledge goes from 22 to 21 levels to go.
+**Try the whole loop:**
+
+1. Open the menu in the top-right corner and choose **Beatriz Lima** (L&D lead).
+2. Go to **Course studio** → **New course** → **Draft course**.
+3. Mark every part OK or Remove (try **Edit wording** on one), then **Approve**.
+4. Switch to **Marta Ribeiro** and play *Lumeva in practice: quiz* in **Learn**.
+5. Switch back and open **For managers**. Lumeva launch knowledge goes from 22 to 21 levels to go, and the new course shows how Marta did on each question.
+6. Press **Demo: let the rest of the team play it** to fill in the quiz insights for the whole made-up team.
+
+### Drafting your own text with Claude (optional)
+
+To draft from your own pasted text, press **Connect Claude (optional)** in the Course studio and paste your own Claude API key.
+
+- The key is stored **only in your browser** and is sent **only to the Claude API** (`api.anthropic.com`), from your browser. It can be removed at any time from the same button.
+- The demo, the repo and the build never contain a key. Without one, the built-in documents still work, and pasted text just explains how to connect.
+- Claude (`claude-sonnet-5-5`) is told to use **only your text** and to return each part with the numbers of the sentences it came from. Its reply goes through the same checks as the prepared drafts, and anything without a valid source is flagged in the review. So the human check still decides what reaches the reps.
+
+## Roadmap
+
+| Version | What it adds | Status |
+| --- | --- | --- |
+| **v1** | The game: skill levels against role targets, short quests, XP, streaks, badges, a weekly leaderboard, team goal, and the For managers page | Released |
+| **v2.0** | Course studio: pick a source, AI draft, review against the source, approve, and the course becomes a quest | [Released](https://github.com/DiogoS7/LevelUp/releases/tag/v2.0) |
+| **v2.1** | Quiz insights for managers, editing a draft before approving, the optional Claude connection, and these docs | [Released](https://github.com/DiogoS7/LevelUp/releases/tag/v2.1) |
+
+v2 was planned as nine user stories with acceptance criteria on a GitHub project board, in two sprints. Each story was merged through its own pull request, which closed its issue.
 
 ## Making it a game, fairly
 
@@ -97,7 +125,7 @@ Points come only from learning, never from sales figures. Quizzes pay for correc
 
 - A short guide opens on your first visit. You can reopen it any time with **How it works**.
 - Press **Start now** on the home page, answer the quiz and claim your XP. Your skills, badges, rank and the team goal all update.
-- Use the menu in the top-right corner to **see the app as any of the 12 reps**, or as a team lead or the L&D lead, who get the **Course studio**.
+- Use the menu in the top-right corner to **see the app as any of the 12 reps**, or as a team lead or the L&D lead, who get the **Course studio** (see [the whole loop](#course-studio)).
 - Open **For managers** to approve a practice task, then switch to that person to see their points.
 - Switch between light and dark with the moon/sun button. By default the app follows your device.
 - Progress is saved in your browser only. **Start again** in the footer clears it.
@@ -113,7 +141,7 @@ Points come only from learning, never from sales figures. Quizzes pay for correc
 | Tests | Vitest unit tests for every game rule, manager headline and Course studio rule (`src/lib/*.test.js`) |
 | CI/CD | GitHub Actions runs the tests and the build on every push and pull request, then publishes `main` to GitHub Pages |
 
-Every rule lives in `src/lib/` as a pure function (data in, data out): skill levels and gaps, the quest suggestions, XP and levels, badges, the leaderboards, the manager headlines and the CSV export. That keeps the rules testable without rendering anything. Connecting a real source, such as a learning platform, a CRM or an HR system, only means replacing `src/data/academy.js`.
+Every rule lives in `src/lib/` as a pure function (data in, data out): skill levels and gaps, the quest suggestions, XP and levels, badges, the leaderboards, the manager headlines, the Course studio checks, the quiz insights and the CSV exports. The Claude request is tested with a fake network, so the tests never need a key. That keeps the rules testable without rendering anything. Connecting a real source, such as a learning platform, a CRM or an HR system, only means replacing `src/data/academy.js`.
 
 ```
 src/
@@ -135,7 +163,9 @@ src/
     ├── game.js            # The game rules
     ├── sentences.js       # Splitting a document into numbered sentences
     ├── draft.js           # The shape of a draft and matching it to the source
-    ├── courses.js         # Reviewing, approving and turning courses into quests
+    ├── courses.js         # Reviewing, editing, approving and turning courses into quests
+    ├── insights.js        # Quiz insights for managers, and the demo team
+    ├── claude.js          # The optional Claude connection (prompt, request, reply)
     └── *.test.js
 ```
 
