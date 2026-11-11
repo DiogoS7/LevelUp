@@ -12,6 +12,8 @@ LevelUp is a learning app for a sales team that feels like a game. It follows th
 2. **How do I learn it without losing a day?** Through quests: a 5-minute lesson, a 3-question quiz or a short practice task. Each one earns points (XP), keeps a daily streak going and can unlock badges.
 3. **What does the whole team need?** Managers see which skills the team is missing, who is ready for the launch, who has stopped learning, and which practice tasks are waiting for their review.
 
+**New in v2.0: the Course studio.** AI creates the training, the game gets people to do it, and managers see the gaps close. [Jump to the Course studio](#course-studio-new-in-v20).
+
 ## The problem it solves
 
 Learning tools for sales teams usually have two problems:
@@ -35,6 +37,27 @@ The **For managers** page opens with the headlines in plain words, worked out fr
 Below that: which skills to train first (how many people lack each skill against how much the company needs it), a ranked list of training priorities, everyone's skills at a glance with a spreadsheet download, an 8-week adoption chart, practice tasks to approve, and a list of people to nudge.
 
 ![For managers: headlines, numbers and which skills to train first](assets/screenshots/managers.webp)
+
+## Course studio (new in v2.0)
+
+Managers and Learning & Development turn a company document into a short course. AI drafts it, a person checks every part against the document, and once it's approved the reps can play it straight away.
+
+1. **Pick a source.** Start from approved material: the built-in Lumeva product leaflet or the field guide to handling a doctor's objections (both made up). Choose the skill the course trains. The document is shown as numbered sentences.
+2. **Let AI draft it.** LevelUp drafts a 5-minute lesson, a 3-question quiz and a practice task. Every point and question lists the sentences it came from. The built-in documents use prepared sample output, so the demo works offline with no API key.
+3. **Check it against the source.** Each part sits next to the document with its sentences highlighted. Mark it **OK** or **Remove**. Anything that isn't in the document is flagged **Not in the source** and can only be removed. Each sample draft has one of these on purpose, to show the check working.
+4. **Approve and it goes live.** Approving records who approved it and when. The course appears in **Learn** for every rep, tagged **New**, and earns XP, streaks and badges like any other quest. **Send back** keeps it as a draft with a note.
+
+Nothing reaches the reps until a person approves it.
+
+| Course studio | Review against the source |
+| --- | --- |
+| ![Course studio](assets/screenshots/studio.webp) | ![Review against the source](assets/screenshots/studio-review.webp) |
+
+| Choose a source | The new course in Learn |
+| --- | --- |
+| ![Choose a source](assets/screenshots/studio-source.webp) | ![The new course in Learn](assets/screenshots/learn-new.webp) |
+
+**Try the whole loop:** open the menu in the top-right corner and choose **Beatriz Lima** (L&D lead) → **Course studio** → **New course** → **Draft course** → mark every part OK or Remove → **Approve**. Then switch to **Marta Ribeiro**, play *Lumeva in practice: quiz* in **Learn**, switch back and open **For managers**: Lumeva launch knowledge goes from 22 to 21 levels to go.
 
 ## Making it a game, fairly
 
@@ -74,7 +97,7 @@ Points come only from learning, never from sales figures. Quizzes pay for correc
 
 - A short guide opens on your first visit. You can reopen it any time with **How it works**.
 - Press **Start now** on the home page, answer the quiz and claim your XP. Your skills, badges, rank and the team goal all update.
-- Use the menu in the top-right corner to **see the app as any of the 12 people**.
+- Use the menu in the top-right corner to **see the app as any of the 12 reps**, or as a team lead or the L&D lead, who get the **Course studio**.
 - Open **For managers** to approve a practice task, then switch to that person to see their points.
 - Switch between light and dark with the moon/sun button. By default the app follows your device.
 - Progress is saved in your browser only. **Start again** in the footer clears it.
@@ -87,10 +110,10 @@ Points come only from learning, never from sales figures. Quizzes pay for correc
 | Icons | Lucide, via `react-icons/lu` |
 | Charts | Hand-written SVG (skill radar, train-first chart, adoption trend), no chart library |
 | Build | Vite 7 |
-| Tests | Vitest unit tests for every game rule and manager headline (`src/lib/game.test.js`) |
+| Tests | Vitest unit tests for every game rule, manager headline and Course studio rule (`src/lib/*.test.js`) |
 | CI/CD | GitHub Actions runs the tests and the build on every push and pull request, then publishes `main` to GitHub Pages |
 
-Every rule lives in `src/lib/game.js` as a pure function (data in, data out): skill levels and gaps, the quest suggestions, XP and levels, badges, the leaderboards, the manager headlines and the CSV export. That keeps the rules testable without rendering anything. Connecting a real source, such as a learning platform, a CRM or an HR system, only means replacing `src/data/academy.js`.
+Every rule lives in `src/lib/` as a pure function (data in, data out): skill levels and gaps, the quest suggestions, XP and levels, badges, the leaderboards, the manager headlines and the CSV export. That keeps the rules testable without rendering anything. Connecting a real source, such as a learning platform, a CRM or an HR system, only means replacing `src/data/academy.js`.
 
 ```
 src/
@@ -100,13 +123,20 @@ src/
 │   ├── QuestPlayer.jsx    # Lessons, playable quizzes and practice tasks
 │   ├── QuestCard.jsx
 │   ├── SkillDetail.jsx
+│   ├── studio/            # Course studio: source, drafting, review and the document panel
 │   ├── Card.jsx
 │   └── ui.jsx             # Logo, avatar, bars, level blocks, chips, tips, modal, buttons
-├── views/                 # Home, Skills, Learn, Leaderboard, For managers
-├── data/academy.js        # Made-up skills, role levels, demand, people and quests
+├── views/                 # Home, Skills, Learn, Leaderboard, For managers, Course studio
+├── data/
+│   ├── academy.js         # Made-up skills, role levels, demand, people and quests
+│   ├── sources.js         # Built-in source documents for the Course studio
+│   └── drafts.js          # Prepared AI drafts for those documents (offline demo)
 └── lib/
-    ├── game.js            # All the rules
-    └── game.test.js
+    ├── game.js            # The game rules
+    ├── sentences.js       # Splitting a document into numbered sentences
+    ├── draft.js           # The shape of a draft and matching it to the source
+    ├── courses.js         # Reviewing, approving and turning courses into quests
+    └── *.test.js
 ```
 
 ## Run it yourself
