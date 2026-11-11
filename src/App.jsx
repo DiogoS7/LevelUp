@@ -108,8 +108,11 @@ export default function App() {
     setTimeout(() => setToasts((list) => list.filter((t) => t.id !== id)), 3800);
   }, []);
 
+  // Bumped on every menu click, so choosing the page you're on starts it fresh (e.g. back to the studio list).
+  const [visit, setVisit] = useState(0);
   const goTo = (id) => {
     setTab(id);
+    setVisit((v) => v + 1);
     window.history.replaceState(null, '', `#${id}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -228,7 +231,7 @@ export default function App() {
         Skip to content
       </a>
       <TopNav tab={tab} onTab={goTo} rep={viewer} staffView={staffView} onRep={setRepId} onReset={reset} onHelp={() => setGuide(true)} pendingCount={game.pending.length} />
-      <main id="main" className="mx-auto max-w-[1200px] px-4 pt-6 pb-4 sm:px-6" key={`${tab}-${repId}`}>
+      <main id="main" className="mx-auto max-w-[1200px] px-4 pt-6 pb-4 sm:px-6" key={`${tab}-${repId}-${visit}`}>
         {view}
       </main>
       <div className="pb-20 md:pb-0">
