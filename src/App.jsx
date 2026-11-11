@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { TopNav, Footer, WelcomeGuide, Toasts, LevelUpModal, TABS } from './components/Chrome.jsx';
+import { TopNav, Footer, WelcomeGuide, Toasts, LevelUpModal, TABS, tabsFor, homeFor } from './components/Chrome.jsx';
 import QuestPlayer from './components/QuestPlayer.jsx';
 import SkillDetail from './components/SkillDetail.jsx';
 import Home from './views/Home.jsx';
@@ -7,7 +7,8 @@ import Skills from './views/Skills.jsx';
 import Quests from './views/Quests.jsx';
 import Leaderboard from './views/Leaderboard.jsx';
 import Team from './views/Team.jsx';
-import { reps as baseReps, DEFAULT_REP, initialPending, company, questById, skillById, skills } from './data/academy.js';
+import Studio from './views/Studio.jsx';
+import { reps as baseReps, DEFAULT_REP, initialPending, company, questById, skillById, skills, personById, isStaff } from './data/academy.js';
 import {
   emptyState,
   completeQuest,
@@ -35,7 +36,10 @@ function seenWelcome() {
 function load() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    if (saved?.game?.completed && saved.game.pending && saved.game.perfect) return saved;
+    if (saved?.game?.completed && saved.game.pending && saved.game.perfect) {
+      // Progress saved by v1 has no courses yet.
+      return { ...saved, game: { ...saved.game, courses: saved.game.courses ?? [] } };
+    }
   } catch {
     /* fall through to defaults */
   }
@@ -51,14 +55,14 @@ function save(value) {
 
 const tabFromHash = () => {
   const id = window.location.hash.replace('#', '');
-  return TABS.some((t) => t.id === id) ? id : 'home';
+  return TABS.some((t) => t.id === id) ? id : null;
 };
 
 export default function App() {
   const saved = useRef(load()).current;
-  const [repId, setRepId] = useState(saved?.repId && baseReps.some((r) => r.id === saved.repId) ? saved.repId : DEFAULT_REP);
+  const [repId, setRepId] = useState(saved?.repId && personById[saved.repId] ? saved.repId : DEFAULT_REP);
   const [game, setGame] = useState(saved?.game ?? emptyState(initialPending));
-  const [tab, setTab] = useState(tabFromHash);
+  const [requestedTab, setTab] = useState(tabFromHash);
   const [activeQuest, setActiveQuest] = useState(null);
   const [openSkill, setOpenSkill] = useState(null);
   const [toasts, setToasts] = useState([]);
@@ -81,11 +85,19 @@ export default function App() {
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
 
+  const staffView = isStaff(repId);
+  // A page this viewer can't open (e.g. the Course studio for a rep) falls back to their first page.
+  const tab = tabsFor(staffView).some((t) => t.id === requestedTab) ? requestedTab : homeFor(staffView);
+  useEffect(() => {
+    if (window.location.hash !== `#${tab}`) window.history.replaceState(null, '', `#${tab}`);
+  }, [tab]);
+
   const reps = useMemo(() => applyAll(baseReps, game), [game]);
-  const rep = reps.find((r) => r.id === repId);
-  const badges = useMemo(() => badgesFor(rep, game), [rep, game]);
+  const viewer = staffView ? personById[repId] : reps.find((r) => r.id === repId);
+  const rep = staffView ? null : viewer;
+  const badges = useMemo(() => (rep ? badgesFor(rep, game) : []), [rep, game]);
   const league = individualLeague(reps);
-  const rank = league.find((row) => row.rep.id === repId).rank;
+  const rank = rep ? league.find((row) => row.rep.id === repId).rank : null;
 
   const toast = useCallback((title, text, tone = 'gold') => {
     const id = `${Date.now()}-${Math.random()}`;
@@ -165,6 +177,7 @@ export default function App() {
   if (tab === 'skills') view = <Skills rep={rep} onOpenSkill={setOpenSkill} />;
   else if (tab === 'quests') view = <Quests rep={rep} state={game} onStart={startQuest} />;
   else if (tab === 'league') view = <Leaderboard reps={reps} currentId={repId} />;
+  else if (tab === 'studio') view = <Studio viewer={viewer} state={game} onNew={() => toast('Coming next', 'Choosing a source document arrives in US-02.', 'blue')} />;
   else if (tab === 'team')
     view = <Team reps={reps} state={game} onApprove={approve} onReturn={sendBack} onNudge={(r) => toast('Reminder sent', `${r.name} got a friendly nudge and a 5-minute quest.`, 'blue')} />;
   else
@@ -186,7 +199,7 @@ export default function App() {
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-surface focus:px-3 focus:py-2">
         Skip to content
       </a>
-      <TopNav tab={tab} onTab={goTo} rep={rep} onRep={setRepId} onReset={reset} onHelp={() => setGuide(true)} pendingCount={game.pending.length} />
+      <TopNav tab={tab} onTab={goTo} rep={viewer} staffView={staffView} onRep={setRepId} onReset={reset} onHelp={() => setGuide(true)} pendingCount={game.pending.length} />
       <main id="main" className="mx-auto max-w-[1200px] px-4 pt-6 pb-4 sm:px-6" key={`${tab}-${repId}`}>
         {view}
       </main>
@@ -194,9 +207,9 @@ export default function App() {
         <Footer onReset={reset} />
       </div>
       <QuestPlayer quest={activeQuest} onClose={() => setActiveQuest(null)} onFinish={finishQuest} />
-      <SkillDetail skillId={openSkill} rep={rep} reps={reps} state={game} onClose={() => setOpenSkill(null)} onStart={startQuest} />
+      {rep && <SkillDetail skillId={openSkill} rep={rep} reps={reps} state={game} onClose={() => setOpenSkill(null)} onStart={startQuest} />}
       <LevelUpModal celebration={celebration} onClose={() => setCelebration(null)} />
-      <WelcomeGuide open={guide} onClose={closeGuide} firstName={rep.name.split(' ')[0]} />
+      <WelcomeGuide open={guide} onClose={closeGuide} viewer={viewer} staffView={staffView} />
       <Toasts toasts={toasts} />
     </>
   );

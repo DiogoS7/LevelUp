@@ -190,6 +190,21 @@ export const reps = [
 export const DEFAULT_REP = 'MR';
 
 /**
+ * Managers and L&D: they don't play the game themselves, but they see the team and run the Course studio.
+ * role: 'lead' (team lead) or 'ld' (Learning & Development).
+ */
+export const staff = [
+  { id: 'BL', name: 'Beatriz Lima', role: 'ld', title: 'L&D lead', team: null, hue: ['#0e8f8f', '#075e5e'] },
+  { id: 'RC', name: 'Rui Costa', role: 'lead', title: 'Team lead', team: 'lis-n', hue: ['#6d4ae6', '#3b228f'] },
+  { id: 'IF', name: 'Inês Ferreira', role: 'lead', title: 'Team lead', team: 'lis-s', hue: ['#e0457b', '#8f1f47'] },
+  { id: 'TM', name: 'Tiago Moreira', role: 'lead', title: 'Team lead', team: 'porto', hue: ['#4f6ef7', '#26389c'] },
+];
+
+export const people = [...reps, ...staff];
+export const personById = Object.fromEntries(people.map((p) => [p.id, p]));
+export const isStaff = (id) => staff.some((s) => s.id === id);
+
+/**
  * Quest types. Lessons and quizzes complete straight away. Role-plays and field challenges are
  * submitted to the team lead, who approves them in Team insights before XP is awarded.
  */
