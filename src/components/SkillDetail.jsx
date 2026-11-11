@@ -1,8 +1,8 @@
 import { LuTrendingUp } from 'react-icons/lu';
 import { Modal, LevelPips, Chip, Bar, DemandChip } from './ui.jsx';
 import QuestCard from './QuestCard.jsx';
-import { skillById, categoryById, quests } from '../data/academy.js';
-import { skillLevel, targetFor, levelProgress, levelName, questStatus } from '../lib/game.js';
+import { skillById, categoryById } from '../data/academy.js';
+import { skillLevel, targetFor, levelProgress, levelName, questStatus, allQuests } from '../lib/game.js';
 
 /** Everything about one skill for one rep: level, why it matters, how colleagues compare, and the quests that build it. */
 export default function SkillDetail({ skillId, rep, reps, state, onClose, onStart }) {
@@ -20,7 +20,7 @@ function Body({ skill, rep, reps, state, onStart }) {
   const target = targetFor(rep, skill.id);
   const color = categoryById[skill.category].color;
   const atTarget = reps.filter((r) => skillLevel(r.skills[skill.id]) >= targetFor(r, skill.id)).length;
-  const related = quests.filter((q) => q.skill === skill.id);
+  const related = allQuests(state).filter((q) => q.skill === skill.id);
 
   return (
     <div>

@@ -3,12 +3,12 @@ import { LuCheck, LuX, LuTriangleAlert, LuCircleCheck, LuUndo2, LuBookOpen, LuCi
 import Card from '../Card.jsx';
 import { Button, Chip } from '../ui.jsx';
 import DocumentPanel from './DocumentPanel.jsx';
-import { reviewSummary, sourceTitle } from '../../lib/courses.js';
+import { reviewSummary, sourceTitle, courseQuests } from '../../lib/courses.js';
 import { skillById } from '../../data/academy.js';
 
 const KIND_ICON = { lesson: LuBookOpen, quiz: LuCircleHelp, practice: LuMic };
 
-function Item({ item, selected, onSelect, onDecide, locked }) {
+function Item({ item, sentences, selected, onSelect, onDecide, locked }) {
   const Icon = KIND_ICON[item.kind];
   const tone = item.decision === 'ok' ? 'border-good/50' : item.decision === 'remove' ? 'border-line opacity-60' : selected ? 'border-brand' : 'border-line';
   return (
@@ -44,6 +44,15 @@ function Item({ item, selected, onSelect, onDecide, locked }) {
         )}
         {item.kind === 'practice' && <p className="mt-1 text-[13px] text-muted">{item.detail}</p>}
         {!item.inSource && <p className="mt-2 text-[13px] text-bad">{item.problem}. It can only be removed.</p>}
+        {item.inSource && (
+          <blockquote className="mt-2 rounded-lg border-l-2 border-brand bg-brand-soft px-3 py-1.5 text-[13px] text-muted lg:hidden">
+            {item.sources.map((n) => (
+              <span key={n} className="block">
+                <b className="text-brand">{n}.</b> {sentences[n - 1]?.text}
+              </span>
+            ))}
+          </blockquote>
+        )}
 
         {!locked && (
           <div className="mt-3 flex flex-wrap gap-2" onClick={(e) => e.stopPropagation()}>
@@ -102,6 +111,11 @@ export default function ReviewStep({ course, viewer, onDecide, onApprove, onSend
           {locked ? (
             <p className="mt-2 flex items-center gap-1.5 font-semibold text-good">
               <LuCircleCheck size={17} /> Approved by {course.approvedBy} on {course.approvedAt}
+            </p>
+          ) : null}
+          {locked ? (
+            <p className="mt-1 text-sm text-muted">
+              Live in Learn as {courseQuests([course]).length} new quests: {courseQuests([course]).map((q) => q.title).join(' · ')}
             </p>
           ) : (
             <p className="mt-2 font-semibold">
@@ -162,7 +176,7 @@ export default function ReviewStep({ course, viewer, onDecide, onApprove, onSend
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <ol className="space-y-2.5" aria-label="Parts of the course">
           {summary.items.map((item) => (
-            <Item key={item.key} item={item} locked={locked} selected={item.key === selected} onSelect={() => setSelected(item.key)} onDecide={(d) => (setSelected(item.key), onDecide(item.key, d))} />
+            <Item key={item.key} item={item} sentences={summary.sentences} locked={locked} selected={item.key === selected} onSelect={() => setSelected(item.key)} onDecide={(d) => (setSelected(item.key), onDecide(item.key, d))} />
           ))}
         </ol>
         <div className="lg:sticky lg:top-20 lg:self-start">

@@ -39,6 +39,7 @@ export default function Home({ rep, state, rank, leagueSize, badges, onStart, on
             </span>
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2 text-[13px] text-faint">
+                {next.quest.isNew && <span className="rounded-full bg-brand-soft px-2 py-0.5 text-xs font-semibold text-brand">New</span>}
                 <span>{QUEST_TYPES[next.quest.type].label}</span>·
                 <span className="flex items-center gap-1">
                   <LuClock size={13} /> {next.quest.minutes} min

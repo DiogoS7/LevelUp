@@ -15,6 +15,7 @@ import {
   quests as ALL_QUESTS,
   teams as ALL_TEAMS,
 } from '../data/academy.js';
+import { courseQuests } from './courses.js';
 
 const MAX_POINTS = MAX_SKILL_LEVEL * POINTS_PER_LEVEL;
 export const PASS_RATIO = 2 / 3;
@@ -97,6 +98,18 @@ export function playerLevel(xp) {
   };
 }
 
+/* ------------------------------------------------------------- quests */
+
+/** Every quest a rep can play: the built-in ones plus quests from approved Course studio courses. */
+export function allQuests(state) {
+  const extra = courseQuests(state?.courses ?? []);
+  return extra.length ? [...ALL_QUESTS, ...extra] : ALL_QUESTS;
+}
+
+export function findQuest(state, id) {
+  return questById[id] ?? courseQuests(state?.courses ?? []).find((q) => q.id === id);
+}
+
 /* -------------------------------------------------------- game state */
 
 /**
@@ -132,7 +145,7 @@ export const quizPassed = (result) => result.score / result.total >= PASS_RATIO;
  * 'completed' | 'submitted' | 'failed' | 'already'.
  */
 export function completeQuest(state, repId, questId, result, today) {
-  const quest = questById[questId];
+  const quest = findQuest(state, questId);
   if (!quest || questStatus(state, repId, questId) !== 'open') return { state, outcome: 'already' };
   if (quest.type === 'quiz' && result && !quizPassed(result)) return { state, outcome: 'failed' };
 
@@ -153,7 +166,7 @@ export function completeQuest(state, repId, questId, result, today) {
 
 /** Team lead approves a submitted role-play or field challenge. */
 export function approveQuest(state, repId, questId) {
-  const quest = questById[questId];
+  const quest = findQuest(state, questId);
   if (!state.pending.some((p) => p.repId === repId && p.questId === questId)) return state;
   return {
     ...state,
@@ -177,7 +190,8 @@ export function applyProgress(rep, state) {
   const skills = { ...rep.skills };
   let gained = 0;
   for (const { questId, xp, points } of done) {
-    const quest = questById[questId];
+    const quest = findQuest(state, questId);
+    if (!quest) continue;
     skills[quest.skill] = Math.min(MAX_POINTS, (skills[quest.skill] ?? 0) + points);
     gained += xp;
   }
@@ -203,13 +217,14 @@ export function reasonFor(rep, quest) {
 /** Open quests ranked by how much they help this rep close important gaps. */
 export function recommendQuests(rep, state, limit = 3) {
   const profile = Object.fromEntries(skillProfile(rep).map((r) => [r.skill.id, r]));
-  return ALL_QUESTS.filter((q) => questStatus(state, rep.id, q.id) === 'open')
+  return allQuests(state)
+    .filter((q) => questStatus(state, rep.id, q.id) === 'open')
     .map((quest) => {
       const row = profile[quest.skill];
       const score = row.priority > 0 ? row.priority : row.skill.demand * 0.1;
       return { quest, score, reason: reasonFor(rep, quest) };
     })
-    .sort((a, b) => b.score - a.score || a.quest.minutes - b.quest.minutes || b.quest.xp - a.quest.xp)
+    .sort((a, b) => b.score - a.score || Number(Boolean(b.quest.isNew)) - Number(Boolean(a.quest.isNew)) || a.quest.minutes - b.quest.minutes || b.quest.xp - a.quest.xp)
     .slice(0, limit);
 }
 
@@ -222,7 +237,7 @@ export const BADGES = [
   { id: 'launch-ready', name: 'Launch ready', hint: 'Reach your target in all Lumeva launch skills.', test: (r) => isLaunchReady(r) },
   { id: 'ai-pioneer', name: 'AI pioneer', hint: 'Reach your target in AI-assisted visit preparation.', test: (r) => skillLevel(r.skills['ai-assistant']) >= targetFor(r, 'ai-assistant') },
   { id: 'clean-record', name: 'Compliance champion', hint: 'Reach your target in Compliant promotion.', test: (r) => skillLevel(r.skills['cmp-ethics']) >= targetFor(r, 'cmp-ethics') },
-  { id: 'team-player', name: 'Team player', hint: 'Complete a peer coaching quest.', test: (r, s) => (s.completed[r.id] ?? []).some((c) => questById[c.questId].type === 'coaching') },
+  { id: 'team-player', name: 'Team player', hint: 'Complete a peer coaching quest.', test: (r, s) => (s.completed[r.id] ?? []).some((c) => findQuest(s, c.questId)?.type === 'coaching') },
   { id: 'specialist', name: 'Specialist', hint: 'Reach player level 5.', test: (r) => playerLevel(r.xp).level >= 5 },
 ];
 
@@ -263,11 +278,12 @@ export function skillInsights(reps) {
     const share = reps.length ? below / reps.length : 0;
     const avgGap = reps.length ? rows.reduce((s, r) => s + r.gap, 0) / reps.length : 0;
     const avgLevel = reps.length ? rows.reduce((s, r) => s + r.level, 0) / reps.length : 0;
+    const levelsToGo = rows.reduce((s, r) => s + r.gap, 0);
     const urgency = Math.round((skill.demand * avgGap + (skill.mandatory && below ? 1 : 0)) * 10) / 10;
     let status = 'On track';
     if ((skill.demand >= 3 || skill.mandatory) && share >= 0.5) status = 'Act now';
     else if (share >= 0.34 || (skill.mandatory && below > 0)) status = 'Keep an eye on';
-    return { skill, below, share, avgGap, avgLevel, urgency, status };
+    return { skill, below, share, avgGap, avgLevel, levelsToGo, urgency, status };
   }).sort((a, b) => b.urgency - a.urgency || b.share - a.share);
 }
 
@@ -293,7 +309,7 @@ export function adoption(reps, state, baseQuestsThisWeek = 0) {
 export function challengeProgress(challenge, state) {
   const extra = Object.values(state.completed)
     .flat()
-    .filter((c) => questById[c.questId].skill === challenge.skill).length;
+    .filter((c) => findQuest(state, c.questId)?.skill === challenge.skill).length;
   const done = challenge.baseDone + extra;
   return { done, goal: challenge.goal, progress: Math.min(1, done / challenge.goal) };
 }

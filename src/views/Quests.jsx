@@ -2,10 +2,11 @@ import { useState } from 'react';
 import Card from '../components/Card.jsx';
 import QuestCard from '../components/QuestCard.jsx';
 import { QUEST_ICONS } from '../components/ui.jsx';
-import { quests, QUEST_TYPES, categories, skillById } from '../data/academy.js';
-import { recommendQuests, questStatus } from '../lib/game.js';
+import { QUEST_TYPES, categories, skillById } from '../data/academy.js';
+import { recommendQuests, questStatus, allQuests } from '../lib/game.js';
 
 export default function Quests({ rep, state, onStart }) {
+  const quests = allQuests(state);
   const [type, setType] = useState('all');
   const [category, setCategory] = useState('all');
   const [show, setShow] = useState('open');
