@@ -1,7 +1,9 @@
-import { LuPlus, LuFileText, LuCircleCheck, LuPencilLine, LuShieldCheck, LuSparkles, LuBookOpen } from 'react-icons/lu';
+import { useState } from 'react';
+import { LuPlus, LuFileText, LuCircleCheck, LuPencilLine, LuShieldCheck, LuSparkles, LuBookOpen, LuArrowLeft } from 'react-icons/lu';
 import Card, { CardHeader } from '../components/Card.jsx';
 import { Button, Chip } from '../components/ui.jsx';
 import { skillById } from '../data/academy.js';
+import SourceStep from '../components/studio/SourceStep.jsx';
 
 const STEPS = [
   { icon: LuFileText, title: 'Pick a source', text: 'Start from approved company material, like a product leaflet or a field guide.' },
@@ -30,8 +32,48 @@ function CourseRow({ course, onOpen }) {
 }
 
 /** Course studio: managers and L&D turn a source document into a course, review it and publish it as quests. */
-export default function Studio({ viewer, state, onNew, onOpen = () => {} }) {
+/** Progress through the builder: 1 Source, 2 Draft, 3 Review. */
+function Stepper({ step }) {
+  const steps = ['Source', 'Draft', 'Review'];
+  return (
+    <ol className="flex items-center gap-2 text-sm" aria-label="Steps">
+      {steps.map((label, i) => {
+        const n = i + 1;
+        const state = n < step ? 'done' : n === step ? 'now' : 'later';
+        return (
+          <li key={label} className="flex items-center gap-2" aria-current={state === 'now' ? 'step' : undefined}>
+            <span
+              className={`grid size-6 place-items-center rounded-full text-xs font-bold ${state === 'later' ? 'bg-surface-2 text-faint' : 'bg-brand text-on-brand'}`}
+            >
+              {n}
+            </span>
+            <span className={state === 'now' ? 'font-semibold' : 'text-muted'}>{label}</span>
+            {n < steps.length && <span className="mx-1 h-px w-6 bg-line" />}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+export default function Studio({ viewer, state, onDraft, onOpen = () => {} }) {
+  const [mode, setMode] = useState('list');
   const courses = state.courses ?? [];
+
+  if (mode === 'new') {
+    return (
+      <div className="grid grid-cols-1 gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+          <button onClick={() => setMode('list')} className="flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline">
+            <LuArrowLeft size={15} /> Course studio
+          </button>
+          <Stepper step={1} />
+        </div>
+        <h1 className="text-3xl font-extrabold tracking-tight">New course</h1>
+        <SourceStep onDraft={onDraft} onCancel={() => setMode('list')} />
+      </div>
+    );
+  }
   const drafts = courses.filter((c) => c.status !== 'approved');
   const live = courses.filter((c) => c.status === 'approved');
 
@@ -47,7 +89,7 @@ export default function Studio({ viewer, state, onNew, onOpen = () => {} }) {
         <p className="mt-3 max-w-2xl text-[17px] text-muted">
           AI drafts the course, you check every part of it against the source, and once you approve it the reps can play it straight away as a quest.
         </p>
-        <Button className="mt-6 px-6 py-3 text-[15px]" onClick={onNew}>
+        <Button className="mt-6 px-6 py-3 text-[15px]" onClick={() => setMode('new')}>
           <LuPlus size={17} /> New course
         </Button>
       </section>

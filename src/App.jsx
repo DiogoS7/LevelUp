@@ -177,7 +177,7 @@ export default function App() {
   if (tab === 'skills') view = <Skills rep={rep} onOpenSkill={setOpenSkill} />;
   else if (tab === 'quests') view = <Quests rep={rep} state={game} onStart={startQuest} />;
   else if (tab === 'league') view = <Leaderboard reps={reps} currentId={repId} />;
-  else if (tab === 'studio') view = <Studio viewer={viewer} state={game} onNew={() => toast('Coming next', 'Choosing a source document arrives in US-02.', 'blue')} />;
+  else if (tab === 'studio') view = <Studio viewer={viewer} state={game} onDraft={() => toast('Coming next', 'AI drafting arrives in US-03.', 'blue')} />;
   else if (tab === 'team')
     view = <Team reps={reps} state={game} onApprove={approve} onReturn={sendBack} onNudge={(r) => toast('Reminder sent', `${r.name} got a friendly nudge and a 5-minute quest.`, 'blue')} />;
   else
