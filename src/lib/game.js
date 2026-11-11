@@ -102,10 +102,10 @@ export function playerLevel(xp) {
 /**
  * Session state stored in the browser. Base data never changes; this records what happened on top of it.
  * completed: { [repId]: [{ questId, xp, points }] }, pending: [{ repId, questId, submitted }],
- * perfect: { [repId]: number of perfect quizzes }.
+ * perfect: { [repId]: number of perfect quizzes }, courses: courses made in the Course studio (see studio.js).
  */
 export function emptyState(pending = []) {
-  return { completed: {}, pending: [...pending], perfect: {} };
+  return { completed: {}, pending: [...pending], perfect: {}, courses: [] };
 }
 
 export function questStatus(state, repId, questId) {

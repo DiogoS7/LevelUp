@@ -17,18 +17,31 @@ import {
   LuCircleHelp,
   LuMedal,
   LuArrowRight,
+  LuGraduationCap,
 } from 'react-icons/lu';
 import { LogoMark, Avatar, Modal, Button } from './ui.jsx';
-import { reps, teamById, roles, company } from '../data/academy.js';
+import { reps, staff, teamById, roles, company } from '../data/academy.js';
 import { playerLevel } from '../lib/game.js';
 
+/** `who`: which viewers see the page. Reps play the game; managers and L&D see the team and run the Course studio. */
 export const TABS = [
-  { id: 'home', label: 'Home', icon: LuHouse },
-  { id: 'skills', label: 'My skills', icon: LuTarget },
-  { id: 'quests', label: 'Learn', icon: LuBookOpen },
-  { id: 'league', label: 'Leaderboard', icon: LuTrophy },
-  { id: 'team', label: 'For managers', icon: LuUsers },
+  { id: 'home', label: 'Home', short: 'Home', icon: LuHouse, who: 'rep' },
+  { id: 'skills', label: 'My skills', short: 'Skills', icon: LuTarget, who: 'rep' },
+  { id: 'quests', label: 'Learn', short: 'Learn', icon: LuBookOpen, who: 'rep' },
+  { id: 'league', label: 'Leaderboard', short: 'League', icon: LuTrophy, who: 'all' },
+  { id: 'team', label: 'For managers', short: 'Managers', icon: LuUsers, who: 'all' },
+  { id: 'studio', label: 'Course studio', short: 'Studio', icon: LuGraduationCap, who: 'staff' },
 ];
+
+/** Pages this viewer can open, in menu order. */
+export function tabsFor(staffView) {
+  return TABS.filter((t) => t.who === 'all' || t.who === (staffView ? 'staff' : 'rep'));
+}
+
+/** First page for a viewer, and where a page they can't open sends them. */
+export const homeFor = (staffView) => (staffView ? 'team' : 'home');
+
+const subtitleFor = (p) => (p.role === 'ld' ? p.title : p.role === 'lead' ? `${p.title} · ${teamById[p.team].name}` : `${roles[p.role].label} · ${teamById[p.team].name}`);
 
 /** Light/dark toggle. The choice is remembered; until then the app follows the device. */
 function ThemeToggle() {
@@ -67,7 +80,25 @@ function RepMenu({ rep, onRep, onReset }) {
     document.addEventListener('mousedown', close);
     return () => document.removeEventListener('mousedown', close);
   }, []);
-  const level = playerLevel(rep.xp);
+  const level = rep.xp != null ? playerLevel(rep.xp) : null;
+  const row = (r) => (
+    <button
+      key={r.id}
+      role="menuitem"
+      onClick={() => {
+        onRep(r.id);
+        setOpen(false);
+      }}
+      className={`flex w-full items-center gap-2.5 rounded-xl px-2 py-1.5 text-left ${r.id === rep.id ? 'bg-brand-soft' : 'hover:bg-surface-2'}`}
+    >
+      <Avatar id={r.id} size={26} />
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm">{r.name}</span>
+        <span className="block text-[11px] text-faint">{subtitleFor(r)}</span>
+      </span>
+      {r.id === rep.id && <LuCheck size={15} className="text-brand" />}
+    </button>
+  );
   return (
     <div ref={box} className="relative">
       <button
@@ -79,7 +110,7 @@ function RepMenu({ rep, onRep, onReset }) {
         <Avatar id={rep.id} size={28} />
         <span className="hidden text-left leading-tight lg:block">
           <span className="block text-[13px] font-semibold">{rep.name}</span>
-          <span className="block text-[11px] text-faint">Level {level.level}</span>
+          <span className="block text-[11px] text-faint">{level ? `Level ${level.level}` : rep.title}</span>
         </span>
         <LuChevronDown size={15} className="text-faint" />
       </button>
@@ -95,27 +126,11 @@ function RepMenu({ rep, onRep, onReset }) {
             <div className="px-2 pt-1 pb-2 text-xs text-faint">
               <b className="text-muted">Try it as anyone.</b> Pick a person to see LevelUp through their eyes.
             </div>
-            <div className="scroll-thin max-h-80 overflow-y-auto">
-              {reps.map((r) => (
-                <button
-                  key={r.id}
-                  role="menuitem"
-                  onClick={() => {
-                    onRep(r.id);
-                    setOpen(false);
-                  }}
-                  className={`flex w-full items-center gap-2.5 rounded-xl px-2 py-1.5 text-left ${r.id === rep.id ? 'bg-brand-soft' : 'hover:bg-surface-2'}`}
-                >
-                  <Avatar id={r.id} size={26} />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm">{r.name}</span>
-                    <span className="block text-[11px] text-faint">
-                      {roles[r.role].label} · {teamById[r.team].name}
-                    </span>
-                  </span>
-                  {r.id === rep.id && <LuCheck size={15} className="text-brand" />}
-                </button>
-              ))}
+            <div className="scroll-thin max-h-96 overflow-y-auto">
+              <div className="px-2 pt-1 pb-1 text-[11px] font-semibold tracking-wide text-faint uppercase">Managers and L&amp;D</div>
+              {staff.map(row)}
+              <div className="px-2 pt-3 pb-1 text-[11px] font-semibold tracking-wide text-faint uppercase">Sales reps</div>
+              {reps.map(row)}
             </div>
             <div className="mt-1 border-t border-line pt-1">
               <button
@@ -137,17 +152,18 @@ function RepMenu({ rep, onRep, onReset }) {
 }
 
 /** Sticky top bar like Ledger's: logo, plain-word menu, help, theme and the person you're viewing as. */
-export function TopNav({ tab, onTab, rep, onRep, onReset, onHelp, pendingCount }) {
+export function TopNav({ tab, onTab, rep, staffView, onRep, onReset, onHelp, pendingCount }) {
+  const tabs = tabsFor(staffView);
   return (
     <>
       <header className="sticky top-0 z-30 border-b border-line bg-bg/90 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-[1200px] items-center gap-3 px-4 sm:px-6">
-          <button onClick={() => onTab('home')} className="mr-auto flex items-center gap-2 md:mr-4" aria-label="LevelUp home">
+          <button onClick={() => onTab(homeFor(staffView))} className="mr-auto flex items-center gap-2 md:mr-4" aria-label="LevelUp home">
             <LogoMark size={32} />
             <span className="text-lg font-extrabold tracking-tight">LevelUp</span>
           </button>
           <nav aria-label="Main" className="mr-auto hidden items-center gap-1 md:flex">
-            {TABS.map(({ id, label }) => (
+            {tabs.map(({ id, label }) => (
               <button
                 key={id}
                 onClick={() => onTab(id)}
@@ -173,7 +189,7 @@ export function TopNav({ tab, onTab, rep, onRep, onReset, onHelp, pendingCount }
       </header>
 
       <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-30 flex border-t border-line bg-surface/95 px-1 pt-1.5 pb-[max(6px,env(safe-area-inset-bottom))] backdrop-blur md:hidden">
-        {TABS.map(({ id, label, icon: Icon }) => {
+        {tabs.map(({ id, short, icon: Icon }) => {
           const active = tab === id;
           return (
             <button
@@ -185,7 +201,7 @@ export function TopNav({ tab, onTab, rep, onRep, onReset, onHelp, pendingCount }
               <span className={`grid h-7 w-12 place-items-center rounded-full ${active ? 'bg-brand-soft' : ''}`}>
                 <Icon size={18} />
               </span>
-              {id === 'team' ? 'Managers' : label}
+              {short}
               {id === 'team' && pendingCount > 0 && (
                 <span className="absolute top-0 right-[18%] grid size-4 place-items-center rounded-full bg-amber text-[9px] font-bold text-[#4a2a00]">{pendingCount}</span>
               )}
@@ -239,7 +255,8 @@ const GUIDE = [
 ];
 
 /** First-visit guide. Can be reopened any time from "How it works". */
-export function WelcomeGuide({ open, onClose, firstName }) {
+export function WelcomeGuide({ open, onClose, viewer, staffView }) {
+  const firstName = viewer.name.split(' ')[0];
   return (
     <Modal open={open} onClose={onClose} title="Welcome to LevelUp" wide>
       <p className="-mt-2 text-[15px] text-muted">
@@ -260,7 +277,7 @@ export function WelcomeGuide({ open, onClose, firstName }) {
         ))}
       </ol>
       <p className="mt-4 text-[13px] text-faint">
-        This is a demo. You are viewing it as {firstName}, a sales rep at the made-up {company.name}. Use the menu in the top right to switch person. Your progress stays in this browser only.
+        This is a demo. You are viewing it as {firstName}, {staffView ? `${viewer.role === 'ld' ? 'the L&D lead' : 'a team lead'}` : 'a sales rep'} at the made-up {company.name}. Use the menu in the top right to switch person. Your progress stays in this browser only.
       </p>
       <div className="mt-5 flex justify-end">
         <Button onClick={onClose}>

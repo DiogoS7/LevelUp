@@ -1,9 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { LuX, LuBookOpen, LuCircleHelp, LuMic, LuMapPin, LuHandshake } from 'react-icons/lu';
-import { reps } from '../data/academy.js';
-
-const repById = Object.fromEntries(reps.map((r) => [r.id, r]));
+import { personById } from '../data/academy.js';
 
 /** LevelUp mark: a violet medal on a ribbon with a gold star. */
 export function LogoMark({ size = 36, className = '' }) {
@@ -27,7 +25,7 @@ export function LogoMark({ size = 36, className = '' }) {
 
 /** Initials avatar with a gradient per rep. */
 export function Avatar({ id, size = 28, className = '' }) {
-  const rep = repById[id];
+  const rep = personById[id];
   const [from, to] = rep?.hue ?? ['#9ca3af', '#4b5563'];
   return (
     <span
