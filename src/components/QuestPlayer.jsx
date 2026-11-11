@@ -5,15 +5,15 @@ import { QUEST_TYPES, skillById } from '../data/academy.js';
 import { rewardFor, quizPassed, PERFECT_QUIZ_BONUS } from '../lib/game.js';
 
 /** Plays a quest: reads a lesson, runs a quiz, or submits a role-play / field challenge for review. */
-export default function QuestPlayer({ quest, onClose, onFinish }) {
+export default function QuestPlayer({ quest, onClose, onFinish, onAttempt = () => {} }) {
   return (
     <Modal open={Boolean(quest)} onClose={onClose} title={quest?.title ?? ''} wide={quest?.type === 'quiz'}>
-      {quest && <PlayerBody key={quest.id} quest={quest} onFinish={onFinish} />}
+      {quest && <PlayerBody key={quest.id} quest={quest} onFinish={onFinish} onAttempt={onAttempt} />}
     </Modal>
   );
 }
 
-function PlayerBody({ quest, onFinish }) {
+function PlayerBody({ quest, onFinish, onAttempt }) {
   const Icon = QUEST_ICONS[quest.type];
   const type = QUEST_TYPES[quest.type];
   return (
@@ -30,7 +30,7 @@ function PlayerBody({ quest, onFinish }) {
           <LuZap size={12} /> {quest.xp} XP
         </Chip>
       </div>
-      {quest.type === 'quiz' ? <Quiz quest={quest} onFinish={onFinish} /> : <Reading quest={quest} onFinish={onFinish} />}
+      {quest.type === 'quiz' ? <Quiz quest={quest} onFinish={onFinish} onAttempt={onAttempt} /> : <Reading quest={quest} onFinish={onFinish} />}
     </div>
   );
 }
@@ -66,11 +66,12 @@ function Reading({ quest, onFinish }) {
   );
 }
 
-function Quiz({ quest, onFinish }) {
+function Quiz({ quest, onFinish, onAttempt }) {
   const [index, setIndex] = useState(0);
   const [picked, setPicked] = useState(null);
   const [score, setScore] = useState(0);
   const [finished, setFinished] = useState(false);
+  const [answers, setAnswers] = useState([]);
   const total = quest.questions.length;
 
   if (finished) {
@@ -99,6 +100,7 @@ function Quiz({ quest, onFinish }) {
               onClick={() => {
                 setIndex(0);
                 setScore(0);
+                setAnswers([]);
                 setPicked(null);
                 setFinished(false);
               }}
@@ -114,7 +116,11 @@ function Quiz({ quest, onFinish }) {
   const question = quest.questions[index];
   const answered = picked !== null;
   const next = () => {
-    if (index + 1 === total) setFinished(true);
+    if (index + 1 === total) {
+      setFinished(true);
+      // Every finished attempt, passed or not, feeds the managers' quiz insights.
+      onAttempt({ questId: quest.id, answers, score, total });
+    }
     else {
       setIndex(index + 1);
       setPicked(null);
@@ -149,6 +155,7 @@ function Quiz({ quest, onFinish }) {
               disabled={answered}
               onClick={() => {
                 setPicked(i);
+                setAnswers((a) => [...a, i]);
                 if (isAnswer) setScore((s) => s + 1);
               }}
               className={`flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-left text-sm transition ${style}`}

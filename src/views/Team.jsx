@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { LuUsers, LuFlame, LuListChecks, LuRocket, LuDownload, LuCheck, LuUndo2, LuBellRing, LuCircleCheck, LuTriangleAlert, LuCircleAlert } from 'react-icons/lu';
 import Card, { CardHeader } from '../components/Card.jsx';
+import QuizInsights from '../components/QuizInsights.jsx';
 import { Avatar, Chip, Button, Stat, InfoTip, QUEST_ICONS } from '../components/ui.jsx';
 import { skills, teams, teamById, adoptionHistory, skillById, categoryById } from '../data/academy.js';
 import { skillInsights, launchReadiness, adoption, skillLevel, targetFor, skillsMatrixCsv, teamFindings, levelName, findQuest } from '../lib/game.js';
@@ -95,7 +96,7 @@ function AdoptionChart() {
 
 const heatClass = (gap) => `heat-${Math.min(gap, 2)}`;
 
-export default function Team({ reps, state, onApprove, onReturn, onNudge }) {
+export default function Team({ reps, state, onApprove, onReturn, onNudge, onSimulate }) {
   const [teamId, setTeamId] = useState('all');
   const group = teamId === 'all' ? reps : reps.filter((r) => r.team === teamId);
   const insights = skillInsights(group);
@@ -161,6 +162,8 @@ export default function Team({ reps, state, onApprove, onReturn, onNudge }) {
           );
         })}
       </section>
+
+      <QuizInsights state={state} reps={group} onSimulate={onSimulate} />
 
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {[

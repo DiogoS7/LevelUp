@@ -9,6 +9,7 @@ import Leaderboard from './views/Leaderboard.jsx';
 import Team from './views/Team.jsx';
 import Studio from './views/Studio.jsx';
 import { createCourse, addCourse, updateCourse, decide, approveCourse, sendBackCourse } from './lib/courses.js';
+import { recordAttempt, simulateTeam } from './lib/insights.js';
 import { reps as baseReps, DEFAULT_REP, initialPending, company, skillById, skills, personById, isStaff } from './data/academy.js';
 import {
   emptyState,
@@ -40,8 +41,8 @@ function load() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
     if (saved?.game?.completed && saved.game.pending && saved.game.perfect) {
-      // Progress saved by v1 has no courses yet.
-      return { ...saved, game: { ...saved.game, courses: saved.game.courses ?? [] } };
+      // Progress saved by earlier versions has no courses or quiz attempts yet.
+      return { ...saved, game: { ...saved.game, courses: saved.game.courses ?? [], attempts: saved.game.attempts ?? [] } };
     }
   } catch {
     /* fall through to defaults */
@@ -210,7 +211,19 @@ export default function App() {
       />
     );
   else if (tab === 'team')
-    view = <Team reps={reps} state={game} onApprove={approve} onReturn={sendBack} onNudge={(r) => toast('Reminder sent', `${r.name} got a friendly nudge and a 5-minute quest.`, 'blue')} />;
+    view = (
+      <Team
+        reps={reps}
+        state={game}
+        onApprove={approve}
+        onReturn={sendBack}
+        onNudge={(r) => toast('Reminder sent', `${r.name} got a friendly nudge and a 5-minute quest.`, 'blue')}
+        onSimulate={(questId) => {
+          setGame((g) => simulateTeam(g, questId, applyAll(baseReps, g), today()));
+          toast('The team played it', 'Everyone who had not tried the quiz has now taken it once (demo).', 'blue');
+        }}
+      />
+    );
   else
     view = (
       <Home
@@ -237,7 +250,12 @@ export default function App() {
       <div className="pb-20 md:pb-0">
         <Footer onReset={reset} />
       </div>
-      <QuestPlayer quest={activeQuest} onClose={() => setActiveQuest(null)} onFinish={finishQuest} />
+      <QuestPlayer
+        quest={activeQuest}
+        onClose={() => setActiveQuest(null)}
+        onFinish={finishQuest}
+        onAttempt={(a) => rep && setGame((g) => recordAttempt(g, { ...a, repId: rep.id, date: today() }))}
+      />
       {rep && <SkillDetail skillId={openSkill} rep={rep} reps={reps} state={game} onClose={() => setOpenSkill(null)} onStart={startQuest} />}
       <LevelUpModal celebration={celebration} onClose={() => setCelebration(null)} />
       <WelcomeGuide open={guide} onClose={closeGuide} viewer={viewer} staffView={staffView} />
